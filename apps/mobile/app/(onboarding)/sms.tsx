@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { api } from "../../src/api/client";
-import { toErrorKey } from "../../src/api/errors";
+import { ApiClientError, toErrorKey } from "../../src/api/errors";
 import { useSession } from "../../src/auth/session";
 import { Body, Button, ErrorText, Field, Screen, Title } from "../../src/components/ui";
 import { useI18n, type TKey } from "../../src/i18n";
@@ -42,7 +42,8 @@ export default function SmsSignIn() {
       await signIn(tokens);
       router.replace("/");
     } catch (e) {
-      setErrorKey(toErrorKey(e));
+      // The API answers 401 for a wrong or expired code: that is not an expired session.
+      setErrorKey(e instanceof ApiClientError && e.status === 401 ? "error.invalidCode" : toErrorKey(e));
     } finally {
       setBusy(false);
     }

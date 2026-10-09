@@ -1,32 +1,45 @@
 // Typed client for the MIMT API (apps/api). Handles bearer tokens, single-flight refresh on expiry
 // or 401, and maps every failure to a translated message key (see errors.ts).
 import Constants from "expo-constants";
-import type { PlanCode } from "@mimt/shared";
 import { ApiClientError, errorKeyFor } from "./errors";
 import { clearSession, loadSession, saveSession, toSession, type StoredSession } from "./tokens";
 import type {
   AuthTokens,
-  AvailableNumber,
-  CallRecord,
-  CheckoutRequest,
+  AvailableNumbersResponse,
+  CallsResponse,
+  CheckoutResponse,
+  ClaimNumberResponse,
   ConsentRequest,
-  Conversation,
+  ConsentResponse,
+  ConversationsResponse,
   E911AckRequest,
+  E911AckResponse,
   E911Address,
-  E911Notice,
+  E911AddressResponse,
+  E911NoticeResponse,
   Locale,
+  MeExportResponse,
   MeResponse,
-  Message,
+  MessageDto,
+  MessagesResponse,
+  OtpStartResponse,
+  PaidPlanCode,
+  PushRegisterRequest,
+  RewardClaimRequest,
+  RewardClaimResponse,
   SendMessageRequest,
   TakatakExchangeRequest,
-  Voicemail,
+  UpdateMeRequest,
+  UpdateMeResponse,
+  VoicemailsResponse,
+  VoicePlatform,
   VoiceTokenResponse,
 } from "./types";
 
 export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? "https://api.mimt.ca").replace(/\/+$/, "");
 export const APP_VERSION = Constants.expoConfig?.version ?? "0.0.0";
 
-type Method = "GET" | "POST" | "PUT" | "DELETE";
+type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 interface RequestOptions {
   body?: unknown;
   auth?: boolean;
@@ -159,57 +172,66 @@ export async function request<T>(method: Method, path: string, opts: RequestOpti
 
 // ---------------------------------------------------------------------------------------- endpoints
 
+/** Revokes the refresh-token family server-side (POST /v1/auth/logout takes the refresh token, not a bearer). */
+async function logout(): Promise<void> {
+  const current = await getSession();
+  if (!current) return;
+  await request<void>("POST", "/v1/auth/logout", { body: { refreshToken: current.refreshToken }, auth: false });
+}
+
 export const api = {
   // Auth (flow A in docs/MIMT-MVP.md §4: the API exchanges the code server-to-server).
   takatakExchange: (body: TakatakExchangeRequest) =>
     request<AuthTokens>("POST", "/v1/auth/takatak/exchange", { body, auth: false }),
-  otpStart: (phone: string) => request<void>("POST", "/v1/auth/otp/start", { body: { phone }, auth: false }),
+  otpStart: (phone: string) => request<OtpStartResponse>("POST", "/v1/auth/otp/start", { body: { phone }, auth: false }),
+  /** A wrong or expired code answers 401 (not a session problem). */
   otpVerify: (phone: string, code: string) =>
     request<AuthTokens>("POST", "/v1/auth/otp/verify", { body: { phone, code }, auth: false }),
-  logout: () => request<void>("POST", "/v1/auth/logout"),
+  logout,
 
   me: () => request<MeResponse>("GET", "/v1/me"),
-  updateMe: (body: { locale: Locale }) => request<void>("PUT", "/v1/me", { body }),
-  exportData: () => request<{ url: string }>("POST", "/v1/me/export"),
+  updateMe: (body: UpdateMeRequest) => request<UpdateMeResponse>("PATCH", "/v1/me", { body }),
+  /** Law 25 portability: the full export as JSON (the app hands it to the share sheet). */
+  exportData: () => request<MeExportResponse>("GET", "/v1/me/export"),
   deleteAccount: () => request<void>("DELETE", "/v1/me"),
-  setConsent: (body: ConsentRequest) => request<void>("POST", "/v1/consents", { body }),
+  setConsent: (body: ConsentRequest) => request<ConsentResponse>("POST", "/v1/consents", { body }),
 
   // 9-1-1
-  getE911Address: () => request<E911Address>("GET", "/v1/e911/address"),
-  putE911Address: (body: E911Address) => request<void>("PUT", "/v1/e911/address", { body }),
-  e911Notice: (locale: Locale) => request<E911Notice>("GET", "/v1/e911/notice", { query: { locale } }),
-  e911Ack: (body: E911AckRequest) => request<void>("POST", "/v1/e911/ack", { body }),
+  /** 404 (error.notFound) when no address is registered yet. */
+  getE911Address: () => request<E911AddressResponse>("GET", "/v1/e911/address"),
+  putE911Address: (body: E911Address) => request<E911AddressResponse>("PUT", "/v1/e911/address", { body }),
+  e911Notice: (locale: Locale) => request<E911NoticeResponse>("GET", "/v1/e911/notice", { query: { locale }, auth: false }),
+  /** The app version travels in the X-App-Version header. */
+  e911Ack: (body: E911AckRequest) => request<E911AckResponse>("POST", "/v1/e911/acknowledge", { body }),
 
   // Numbers
-  availableNumbers: (areaCode: string) =>
-    request<{ numbers: AvailableNumber[] }>("GET", "/v1/numbers/available", { query: { areaCode } }),
-  claimNumber: (e164: string) => request<{ id: string; e164: string }>("POST", "/v1/numbers", { body: { e164 } }),
+  availableNumbers: (areaCode: string) => request<AvailableNumbersResponse>("GET", "/v1/numbers/available", { query: { areaCode } }),
+  claimNumber: (e164: string) => request<ClaimNumberResponse>("POST", "/v1/numbers/claim", { body: { e164 } }),
 
-  // Voice
-  voiceToken: () => request<VoiceTokenResponse>("GET", "/v1/voice/token"),
-  calls: () => request<{ calls: CallRecord[] }>("GET", "/v1/calls"),
+  // Voice. The platform picks the VoIP push credential: without it incoming calls cannot ring the device.
+  voiceToken: (platform: VoicePlatform) => request<VoiceTokenResponse>("GET", "/v1/voice/token", { query: { platform } }),
+  calls: (cursor?: string) => request<CallsResponse>("GET", "/v1/calls", { query: { cursor } }),
 
   // Messaging
-  conversations: () => request<{ conversations: Conversation[] }>("GET", "/v1/conversations"),
-  messages: (peer: string) => request<{ messages: Message[] }>("GET", `/v1/conversations/${encodeURIComponent(peer)}/messages`),
-  sendMessage: (body: SendMessageRequest & { mediaUrls?: string[] }) => request<Message>("POST", "/v1/messages", { body }),
+  conversations: () => request<ConversationsResponse>("GET", "/v1/conversations"),
+  /** Newest first; pass nextCursor to load older messages. */
+  messages: (peer: string, cursor?: string) =>
+    request<MessagesResponse>("GET", `/v1/conversations/${encodeURIComponent(peer)}/messages`, { query: { cursor } }),
+  sendMessage: (body: SendMessageRequest) => request<MessageDto>("POST", "/v1/messages", { body }),
 
-  // Voicemail
-  voicemails: () => request<{ voicemails: Voicemail[] }>("GET", "/v1/voicemails"),
+  // Voicemail. Each item carries a short-lived signed audioUrl served by the API (no header needed).
+  voicemails: () => request<VoicemailsResponse>("GET", "/v1/voicemails"),
   deleteVoicemail: (id: string) => request<void>("DELETE", `/v1/voicemails/${encodeURIComponent(id)}`),
 
   // Billing (web checkout via Stripe). TODO(store-billing): consumer plans bought inside the iOS/Android
   // app must use Apple/Google in-app purchases (MIMT-MVP §6); this web checkout is for business plans
-  // and for testing until IAP is wired.
-  checkout: (plan: PlanCode, returnUrl: string) =>
-    request<{ url: string }>("POST", "/v1/billing/checkout", { body: { plan, returnUrl } satisfies CheckoutRequest }),
+  // and for testing until IAP is wired. The API decides the success/cancel URLs.
+  checkout: (plan: PaidPlanCode) => request<CheckoutResponse>("POST", "/v1/billing/checkout", { body: { plan } }),
 
-  // Rewarded ads. TODO(server): the API must only credit minutes after Google's server-side
-  // verification (SSV) callback; this call alone must never be trusted.
-  claimReward: (body: { kind: "rewarded_ad_10min"; adUnitId: string }) =>
-    request<{ creditedMinutes: number }>("POST", "/v1/rewards/claim", { body }),
+  // Rewarded ads. The API answers 501 not_implemented until AdMob server-side verification (SSV) exists;
+  // this call alone must never be trusted to credit minutes.
+  claimReward: (body: RewardClaimRequest) => request<RewardClaimResponse>("POST", "/v1/rewards/claim", { body }),
 
-  // Push (expo-notifications device token for message notifications; VoIP push is Twilio's).
-  registerPush: (body: { token: string; platform: "ios" | "android"; kind: "messages" }) =>
-    request<void>("POST", "/v1/push/register", { body }),
+  // Push (native APNs/FCM device token for message notifications; VoIP push for calls is Twilio's).
+  registerPush: (body: PushRegisterRequest) => request<void>("POST", "/v1/push/register", { body }),
 };

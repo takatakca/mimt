@@ -13,6 +13,17 @@ const CODE_TO_KEY: Record<string, TKey> = {
   plan_required: "error.featureRequired",
   validation_error: "error.validation",
   rate_limited: "error.rateLimited",
+  // Codes sent by apps/api (body: { error, message }).
+  invalid_request: "error.validation",
+  e911_address_required: "error.e911Required",
+  e911_ack_required: "error.e911Required",
+  sms_quota_exhausted: "error.capReached",
+  mms_not_in_plan: "error.featureRequired",
+  intl_requires_paid_plan: "error.featureRequired",
+  number_limit_reached: "error.featureRequired",
+  new_recipient_limit: "error.rateLimited",
+  bulk_identical_blocked: "error.rateLimited",
+  not_implemented: "error.notImplemented",
 };
 
 export function errorKeyFor(status: number | null, code?: string | null): TKey {
@@ -24,6 +35,7 @@ export function errorKeyFor(status: number | null, code?: string | null): TKey {
   if (status === 404) return "error.notFound";
   if (status === 400 || status === 422) return "error.validation";
   if (status === 429) return "error.rateLimited";
+  if (status === 501) return "error.notImplemented";
   if (status >= 500) return "error.server";
   return "error.generic";
 }

@@ -7,14 +7,20 @@ import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { api } from "../../src/api/client";
 import { toErrorKey } from "../../src/api/errors";
-import type { Message } from "../../src/api/types";
+import type { MessageDto } from "../../src/api/types";
 import { useSession } from "../../src/auth/session";
-import { ErrorText, Field, Notice } from "../../src/components/ui";
+import { Button, ErrorText, Field, Notice } from "../../src/components/ui";
 import { useI18n, type TKey } from "../../src/i18n";
 import { formatPhone, toDialable } from "../../src/lib/dial";
 import { formatWhen } from "../../src/lib/format";
 import { callService } from "../../src/services/call";
 import { colors, radius, spacing, TAP } from "../../src/theme";
+
+/** A message as shown in the thread: the API DTO, plus local-only fields for optimistic sends. */
+type ThreadMessage = MessageDto & { mediaUrls?: string[] };
+
+/** The API pages newest first; the thread shows oldest first. */
+const chronological = (list: MessageDto[]) => [...list].reverse();
 
 /** Conversation thread. Route "/thread/new" starts a new conversation with a "To" field. */
 export default function Thread() {
@@ -25,11 +31,14 @@ export default function Thread() {
   const isNew = id === "new";
   const [to, setTo] = useState("");
   const peer = isNew ? toDialable(to) : decodeURIComponent(id ?? "");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ThreadMessage[]>([]);
+  const [olderCursor, setOlderCursor] = useState<string | null>(null);
+  const [loadingOlder, setLoadingOlder] = useState(false);
   const [draft, setDraft] = useState("");
   const [errorKey, setErrorKey] = useState<TKey | null>(null);
   const [mmsHint, setMmsHint] = useState(false);
-  const listRef = useRef<FlatList<Message>>(null);
+  const listRef = useRef<FlatList<ThreadMessage>>(null);
+  const stickToEnd = useRef(true);
   const canMms = !!me && planHas(me.account.plan, "mms");
   const from = me?.numbers[0]?.e164;
 
@@ -37,20 +46,51 @@ export default function Thread() {
     if (isNew || !peer) return;
     api
       .messages(peer)
-      .then((r) => setMessages(r.messages))
+      .then((r) => {
+        stickToEnd.current = true;
+        setMessages(chronological(r.messages));
+        setOlderCursor(r.nextCursor);
+      })
       .catch((e) => setErrorKey(toErrorKey(e)));
   }, [isNew, peer]);
+
+  async function loadOlder() {
+    if (!peer || !olderCursor || loadingOlder) return;
+    setLoadingOlder(true);
+    try {
+      const r = await api.messages(peer, olderCursor);
+      stickToEnd.current = false;
+      setMessages((m) => [...chronological(r.messages), ...m]);
+      setOlderCursor(r.nextCursor);
+    } catch (e) {
+      setErrorKey(toErrorKey(e));
+    } finally {
+      setLoadingOlder(false);
+    }
+  }
 
   async function send(body: string, mediaUrls?: string[], retryId?: string) {
     if (!peer || peer === "911") return setErrorKey("messages.invalidTo");
     if (!from || (!body.trim() && !mediaUrls?.length)) return;
     const tempId = retryId ?? `local-${Date.now()}`;
-    const optimistic: Message = { id: tempId, direction: "outbound", body, mediaUrls, status: "queued", at: new Date().toISOString() };
+    const optimistic: ThreadMessage = {
+      id: tempId,
+      direction: "outbound",
+      ourNumber: from,
+      peer,
+      body,
+      status: "queued",
+      segments: 1,
+      numMedia: mediaUrls?.length ?? 0,
+      createdAt: new Date().toISOString(),
+      ...(mediaUrls ? { mediaUrls } : {}),
+    };
+    stickToEnd.current = true;
     setMessages((m) => [...m.filter((x) => x.id !== tempId), optimistic]);
     setDraft("");
     setErrorKey(null);
     try {
-      const sent = await api.sendMessage({ from, to: peer, body, mediaUrls });
+      const sent = await api.sendMessage({ from, to: peer, body, ...(mediaUrls ? { mediaUrls } : {}) });
       setMessages((m) => m.map((x) => (x.id === tempId ? sent : x)));
       if (isNew) router.replace(`/thread/${encodeURIComponent(peer)}`);
     } catch (e) {
@@ -105,25 +145,32 @@ export default function Thread() {
           data={messages}
           keyExtractor={(m) => m.id}
           contentContainerStyle={{ padding: spacing.md, gap: spacing.sm }}
-          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+          onContentSizeChange={() => stickToEnd.current && listRef.current?.scrollToEnd({ animated: false })}
+          ListHeaderComponent={
+            olderCursor ? (
+              <Button variant="ghost" icon="time" label={t("messages.loadEarlier")} loading={loadingOlder} onPress={loadOlder} />
+            ) : null
+          }
           renderItem={({ item }) => {
             const mine = item.direction === "outbound";
-            const failed = item.status === "failed";
+            // Twilio reports "failed" or "undelivered"; "queued" from the API means accepted, only local drafts are still sending.
+            const failed = item.status === "failed" || item.status === "undelivered";
+            const sending = item.id.startsWith("local-") && item.status === "queued";
             return (
               <Pressable
                 accessibilityRole={failed ? "button" : "text"}
-                accessibilityLabel={`${item.body}. ${formatWhen(item.at, locale, t)}${failed ? `. ${t("messages.failed")}` : ""}`}
+                accessibilityLabel={`${item.body}. ${formatWhen(item.createdAt, locale, t)}${failed ? `. ${t("messages.failed")}` : ""}`}
                 disabled={!failed}
                 onPress={() => send(item.body, item.mediaUrls, item.id)}
                 style={[styles.bubble, mine ? styles.mine : styles.theirs, failed && { borderColor: colors.danger, borderWidth: 1 }]}
               >
                 <Text style={[styles.bubbleText, mine && { color: colors.white }]}>{item.body}</Text>
                 <Text style={styles.meta}>
-                  {item.status === "queued"
+                  {sending
                     ? t("messages.sending")
                     : failed
                       ? t("messages.failed")
-                      : formatWhen(item.at, locale, t)}
+                      : formatWhen(item.createdAt, locale, t)}
                 </Text>
               </Pressable>
             );

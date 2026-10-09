@@ -1,0 +1,11 @@
+# BuildKit reads this file for `-f apps/api/Dockerfile` (context = repo root).
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+.git
+apps/mobile
+apps/web
+**/*.log
+**/coverage

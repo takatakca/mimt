@@ -17,6 +17,9 @@ import { Platform } from "react-native";
 import { api } from "../api/client";
 import { formatPhone, toDialable } from "../lib/dial";
 
+/** Sent with GET /v1/voice/token so the token carries this OS's VoIP push credential. */
+const voicePlatform = () => (Platform.OS === "ios" ? "ios" : "android");
+
 type Sdk = typeof TwilioVoice;
 type Voice = InstanceType<Sdk["Voice"]>;
 type Call = InstanceType<Sdk["Call"]>;
@@ -153,7 +156,7 @@ class CallService {
   /** (Re)registers with a fresh token. Call on sign-in and when the app returns to the foreground. */
   async register(): Promise<void> {
     if (!this.voice) return;
-    const { token } = await api.voiceToken();
+    const { token } = await api.voiceToken(voicePlatform());
     await this.voice.register(token);
     this.registeredToken = token;
   }
@@ -180,7 +183,7 @@ class CallService {
       return true;
     }
     try {
-      const { token } = await api.voiceToken();
+      const { token } = await api.voiceToken(voicePlatform());
       const call = await this.voice.connect(token, {
         params: { To: to, ...(emergency ? { Emergency: "true" } : {}) },
         contactHandle: to,

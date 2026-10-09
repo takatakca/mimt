@@ -1,0 +1,54 @@
+import { pino, type Logger } from "pino";
+import { stripeConfigured, twilioRestConfigured, type Config } from "./config.js";
+import type { AppDeps } from "./deps.js";
+import { loadSigningKey, SessionService } from "./auth/sessions.js";
+import { TakatakOidc } from "./auth/takatak.js";
+import { InMemoryRateLimiter } from "./fraud/rateLimiter.js";
+import { StripeGateway } from "./gateways/billing.js";
+import { TwilioRestGateway } from "./gateways/twilio.js";
+import { MessageCipher } from "./lib/crypto.js";
+import { REDACT_PATHS } from "./logger.js";
+import { MemoryRepository } from "./repo/memory.js";
+import { PostgresRepository } from "./repo/postgres.js";
+import { LogNotifier } from "./services/notifier.js";
+
+export const createLogger = (config: Config): Logger =>
+  pino({ level: config.LOG_LEVEL, redact: { paths: REDACT_PATHS, censor: "[redacted]" } });
+
+/** Builds real dependencies from config. Missing optional services degrade to 503s instead of crashing. */
+export function createDeps(config: Config, log: Logger): AppDeps {
+  let repo;
+  if (config.DATABASE_URL) {
+    repo = new PostgresRepository(config.DATABASE_URL);
+  } else {
+    log.warn("DATABASE_URL not set: using the in-memory repository (data is lost on restart)");
+    repo = new MemoryRepository();
+  }
+
+  const signing = loadSigningKey(config.MIMT_SESSION_SIGNING_KEY);
+  if (signing.ephemeral) log.warn("MIMT_SESSION_SIGNING_KEY not set: using an ephemeral key (sessions end on restart)");
+
+  let cipherKey = config.MESSAGE_ENCRYPTION_KEY;
+  if (!cipherKey) {
+    log.warn("MESSAGE_ENCRYPTION_KEY not set: using an ephemeral key (stored messages become unreadable on restart)");
+    cipherKey = MessageCipher.generateKey();
+  }
+
+  const twilio = twilioRestConfigured(config) ? new TwilioRestGateway(config) : null;
+  if (!twilio) log.warn("Twilio not configured: voice, numbers and messaging answer 503");
+  const billing = stripeConfigured(config) ? new StripeGateway(config.STRIPE_SECRET_KEY!, config.STRIPE_WEBHOOK_SECRET!) : null;
+  if (!billing) log.warn("Stripe not configured: billing answers 503");
+
+  return {
+    config,
+    repo,
+    sessions: new SessionService(repo, signing.key, config.PUBLIC_BASE_URL),
+    takatak: new TakatakOidc(config, repo),
+    twilio,
+    billing,
+    cipher: new MessageCipher(cipherKey),
+    rateLimiter: new InMemoryRateLimiter(),
+    notifier: new LogNotifier(log),
+    now: () => new Date(),
+  };
+}

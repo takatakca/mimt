@@ -71,7 +71,7 @@ export default function ChooseNumber() {
             key={n.e164}
             icon="call"
             title={formatPhone(n.e164)}
-            subtitle={n.locality}
+            subtitle={n.locality ?? undefined}
             label={`${t("number.choose")} ${formatPhone(n.e164)}`}
             onPress={() => confirm(n.e164)}
           />

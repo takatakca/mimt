@@ -94,6 +94,7 @@ export const en: Record<TKey, string> = {
   "messages.sending": "Sending…",
   "messages.invalidTo": "Enter a valid 10-digit number.",
   "messages.call": "Call this contact",
+  "messages.loadEarlier": "Show earlier messages",
 
   "calls.title": "Calls",
   "calls.recents": "Recents",
@@ -140,6 +141,8 @@ export const en: Record<TKey, string> = {
   "voicemail.callBack": "Call back",
   "voicemail.duration": "{seconds} s",
   "voicemail.deleteConfirm": "Delete this voicemail?",
+  "voicemail.noAudio": "The recording is not available.",
+  "voicemail.unknownCaller": "Unknown number",
 
   "contacts.title": "Contacts",
   "contacts.permissionTitle": "Access to your contacts",
@@ -171,6 +174,7 @@ export const en: Record<TKey, string> = {
   "account.rewardLoading": "Getting the ad ready…",
   "account.rewardDone": "10 minutes added to your account!",
   "account.rewardFailed": "The ad is not available right now.",
+  "account.rewardSoon": "Bonus minutes are coming soon. Thanks for your patience!",
   "account.settings": "Settings",
   "account.language": "Language",
   "account.languageFr": "Français",
@@ -179,7 +183,7 @@ export const en: Record<TKey, string> = {
   "account.e911Notice": "Read the 9-1-1 notice again",
   "account.privacy": "Privacy and consents",
   "account.export": "Export my data",
-  "account.exportStarted": "Your export is ready. It opens in the browser.",
+  "account.exportStarted": "Your export is ready. Choose where to save or send it.",
   "account.delete": "Delete my account",
   "account.deleteConfirm":
     "Your account, number, texts and voicemails will be deleted. This cannot be undone. Continue?",
@@ -213,4 +217,5 @@ export const en: Record<TKey, string> = {
   "error.validation": "Some information is invalid. Check the form.",
   "error.server": "The service is temporarily unavailable. Try again later.",
   "error.generic": "Something went wrong. Please try again.",
+  "error.notImplemented": "This feature is coming soon.",
 };

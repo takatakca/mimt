@@ -108,8 +108,24 @@ function Keypad() {
 function Recents() {
   const { t, locale } = useI18n();
   const router = useRouter();
-  const list = useAsync(() => api.calls().then((r) => r.calls));
+  // First page on focus; older pages are appended as the list scrolls (GET /v1/calls?cursor=).
+  const list = useAsync(() => api.calls());
+  const [loadingMore, setLoadingMore] = useState(false);
   useFocusEffect(useCallback(() => void list.reload(), [list.reload]));
+
+  async function loadMore() {
+    const current = list.data;
+    if (!current?.nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const next = await api.calls(current.nextCursor);
+      list.setData({ calls: [...current.calls, ...next.calls], nextCursor: next.nextCursor });
+    } catch {
+      // Keep what is shown; pull-to-refresh retries.
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   const renderItem = ({ item }: { item: CallRecord }) => {
     const kind = item.missed ? t("calls.missed") : t(item.direction === "inbound" ? "calls.incoming" : "calls.outgoing");
@@ -122,6 +138,7 @@ function Recents() {
         label={`${t("calls.callNumber", { number: formatPhone(item.peer) })}. ${kind}`}
         onPress={() => callService.connect(item.peer)}
         right={
+          item.kind === "emergency" ? undefined : (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t("contacts.text", { name: formatPhone(item.peer) })}
@@ -130,6 +147,7 @@ function Recents() {
           >
             <Ionicons name="chatbubble" size={22} color={colors.electric} />
           </Pressable>
+          )
         }
       />
     );
@@ -137,8 +155,10 @@ function Recents() {
 
   return (
     <FlatList
-      data={list.data ?? []}
+      data={list.data?.calls ?? []}
       keyExtractor={(c) => c.id}
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.5}
       renderItem={renderItem}
       contentContainerStyle={{ padding: spacing.md }}
       refreshControl={<RefreshControl refreshing={list.loading} onRefresh={list.reload} tintColor={colors.electric} />}

@@ -4,7 +4,7 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, FlatList, RefreshControl, View } from "react-native";
 import { api } from "../../src/api/client";
-import type { Voicemail } from "../../src/api/types";
+import type { VoicemailDto } from "../../src/api/types";
 import { useSession } from "../../src/auth/session";
 import { Body, Button, Card, ErrorText, Label, Row, Screen, Title } from "../../src/components/ui";
 import { useI18n } from "../../src/i18n";
@@ -20,7 +20,15 @@ export default function VoicemailTab() {
   const [openId, setOpenId] = useState<string | null>(null);
   useFocusEffect(useCallback(() => void list.reload(), [list.reload]));
 
-  function remove(vm: Voicemail) {
+  /** Signed audio URLs are short-lived: refresh the list before opening one that is about to expire. */
+  async function toggle(vm: VoicemailDto) {
+    if (openId === vm.id) return setOpenId(null);
+    const expires = vm.audioUrlExpiresAt ? Date.parse(vm.audioUrlExpiresAt) : Infinity;
+    if (expires - Date.now() < 60_000) await list.reload();
+    setOpenId(vm.id);
+  }
+
+  function remove(vm: VoicemailDto) {
     Alert.alert(t("voicemail.title"), t("voicemail.deleteConfirm"), [
       { text: t("common.cancel"), style: "cancel" },
       {
@@ -50,9 +58,9 @@ export default function VoicemailTab() {
           <Card>
             <Row
               icon="recording"
-              title={formatPhone(item.from)}
-              subtitle={`${formatWhen(item.receivedAt, locale, t)} · ${formatDuration(item.durationS)}`}
-              onPress={() => setOpenId(openId === item.id ? null : item.id)}
+              title={item.from ? formatPhone(item.from) : t("voicemail.unknownCaller")}
+              subtitle={`${formatWhen(item.createdAt, locale, t)} · ${formatDuration(item.durationS ?? 0)}`}
+              onPress={() => void toggle(item)}
             />
             {openId === item.id ? <VoicemailDetail vm={item} onDelete={() => remove(item)} /> : null}
           </Card>
@@ -62,30 +70,35 @@ export default function VoicemailTab() {
   );
 }
 
-function VoicemailDetail({ vm, onDelete }: { vm: Voicemail; onDelete: () => void }) {
+function VoicemailDetail({ vm, onDelete }: { vm: VoicemailDto; onDelete: () => void }) {
   const { t } = useI18n();
   const { me } = useSession();
   const player = useAudioPlayer(vm.audioUrl);
   const status = useAudioPlayerStatus(player);
   const canTranscribe = !!me && planHas(me.account.plan, "vm_transcription");
+  const total = vm.durationS ?? status.duration ?? 0;
 
   return (
     <View style={{ marginTop: spacing.sm }}>
-      <Button
-        icon={status.playing ? "pause" : "play"}
-        label={`${status.playing ? t("voicemail.pause") : t("voicemail.play")} · ${formatDuration(status.currentTime)} / ${formatDuration(vm.durationS)}`}
-        onPress={() => {
-          if (status.playing) player.pause();
-          else {
-            if (status.didJustFinish || status.currentTime >= (status.duration || vm.durationS)) player.seekTo(0);
-            player.play();
-          }
-        }}
-      />
+      {vm.audioUrl ? (
+        <Button
+          icon={status.playing ? "pause" : "play"}
+          label={`${status.playing ? t("voicemail.pause") : t("voicemail.play")} · ${formatDuration(status.currentTime)} / ${formatDuration(total)}`}
+          onPress={() => {
+            if (status.playing) player.pause();
+            else {
+              if (status.didJustFinish || (total > 0 && status.currentTime >= total)) player.seekTo(0);
+              player.play();
+            }
+          }}
+        />
+      ) : (
+        <Body muted>{t("voicemail.noAudio")}</Body>
+      )}
       <Label>{t("voicemail.transcript")}</Label>
       <Body muted={!vm.transcript}>{vm.transcript ?? (canTranscribe ? t("common.empty") : t("voicemail.noTranscript"))}</Body>
       <View style={{ flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm, flexWrap: "wrap" }}>
-        <Button icon="call" variant="success" label={t("voicemail.callBack")} onPress={() => callService.connect(vm.from)} style={{ flexGrow: 1 }} />
+        <Button icon="call" variant="success" label={t("voicemail.callBack")} onPress={() => vm.from && callService.connect(vm.from)} style={{ flexGrow: 1 }} />
         <Button icon="trash" variant="ghost" label={t("common.delete")} onPress={onDelete} style={{ flexGrow: 1 }} />
       </View>
     </View>

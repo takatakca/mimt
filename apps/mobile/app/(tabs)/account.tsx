@@ -1,9 +1,8 @@
-import { formatCad, PLANS, type PlanCode } from "@mimt/shared";
-import * as Linking from "expo-linking";
+import { formatCad, PLANS, type PaidPlanCode, type PlanCode } from "@mimt/shared";
 import { useFocusEffect, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, Share, StyleSheet, Text, View } from "react-native";
 import { api, APP_VERSION } from "../../src/api/client";
 import { toErrorKey } from "../../src/api/errors";
 import { useSession } from "../../src/auth/session";
@@ -24,7 +23,7 @@ const USAGE_LABEL: Record<string, TKey> = {
   outboundSms: "account.usageSms",
 };
 // Consumer upgrades shown in the app. Business plans are sold on the web from the TAKATAK dashboard.
-const UPGRADES: Partial<Record<PlanCode, PlanCode[]>> = { free: ["lock", "premium"], lock: ["premium"] };
+const UPGRADES: Partial<Record<PlanCode, PaidPlanCode[]>> = { free: ["lock", "premium"], lock: ["premium"] };
 
 export default function Account() {
   const { t, lang, setLang, locale } = useI18n();
@@ -54,10 +53,10 @@ export default function Account() {
 
   // TODO(store-billing): consumer subscriptions bought in the iOS/Android app must go through
   // Apple/Google in-app purchase (MIMT-MVP §6). Web checkout is used until IAP is implemented.
-  const upgrade = (code: PlanCode) =>
+  const upgrade = (code: PaidPlanCode) =>
     run(`upgrade-${code}`, async () => {
-      const { url } = await api.checkout(code, Linking.createURL("/account"));
-      await WebBrowser.openBrowserAsync(url);
+      const { checkoutUrl } = await api.checkout(code);
+      await WebBrowser.openBrowserAsync(checkoutUrl);
       await refreshMe();
     });
 
@@ -69,9 +68,10 @@ export default function Account() {
 
   const exportData = () =>
     run("export", async () => {
-      const { url } = await api.exportData();
+      // GET /v1/me/export needs the bearer token, so the app downloads the JSON and hands it to the share sheet.
+      const data = await api.exportData();
       setInfo("account.exportStarted");
-      await WebBrowser.openBrowserAsync(url);
+      await Share.share({ title: `mimt-export-${data.exportedAt.slice(0, 10)}.json`, message: JSON.stringify(data, null, 2) });
     });
 
   const deleteAccount = () =>

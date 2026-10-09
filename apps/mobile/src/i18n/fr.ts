@@ -105,6 +105,7 @@ export const fr = {
   "messages.sending": "Envoi…",
   "messages.invalidTo": "Entrez un numéro valide à 10 chiffres.",
   "messages.call": "Appeler ce contact",
+  "messages.loadEarlier": "Afficher les messages précédents",
 
   // Appels
   "calls.title": "Appels",
@@ -154,6 +155,8 @@ export const fr = {
   "voicemail.callBack": "Rappeler",
   "voicemail.duration": "{seconds} s",
   "voicemail.deleteConfirm": "Supprimer ce message vocal?",
+  "voicemail.noAudio": "L'enregistrement n'est pas disponible.",
+  "voicemail.unknownCaller": "Numéro inconnu",
 
   // Contacts
   "contacts.title": "Contacts",
@@ -187,6 +190,7 @@ export const fr = {
   "account.rewardLoading": "Annonce en préparation…",
   "account.rewardDone": "10 minutes ajoutées à votre compte!",
   "account.rewardFailed": "L'annonce n'est pas disponible pour le moment.",
+  "account.rewardSoon": "Les minutes en prime arrivent bientôt. Merci de votre patience!",
   "account.settings": "Réglages",
   "account.language": "Langue",
   "account.languageFr": "Français",
@@ -195,7 +199,7 @@ export const fr = {
   "account.e911Notice": "Relire l'avis 9-1-1",
   "account.privacy": "Confidentialité et consentements",
   "account.export": "Exporter mes données",
-  "account.exportStarted": "Votre export est prêt. Il s'ouvre dans le navigateur.",
+  "account.exportStarted": "Votre export est prêt. Choisissez où l'enregistrer ou l'envoyer.",
   "account.delete": "Supprimer mon compte",
   "account.deleteConfirm":
     "Votre compte, votre numéro, vos textos et vos messages vocaux seront supprimés. Cette action est définitive. Continuer?",
@@ -233,6 +237,7 @@ export const fr = {
   "error.validation": "Certains renseignements sont invalides. Vérifiez le formulaire.",
   "error.server": "Le service est temporairement indisponible. Réessayez plus tard.",
   "error.generic": "Une erreur est survenue. Réessayez.",
+  "error.notImplemented": "Cette fonction arrive bientôt.",
 } as const;
 
 export type TKey = keyof typeof fr;

@@ -2,7 +2,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { api } from "../../src/api/client";
-import type { Conversation } from "../../src/api/types";
+import type { ConversationDto } from "../../src/api/types";
 import { AdBanner } from "../../src/components/Ads";
 import { Body, Button, ErrorText, Row, Screen, Title } from "../../src/components/ui";
 import { useI18n } from "../../src/i18n";
@@ -17,17 +17,17 @@ export default function Messages() {
   const list = useAsync(() => api.conversations().then((r) => r.conversations));
   useFocusEffect(useCallback(() => void list.reload(), [list.reload]));
 
-  const renderItem = ({ item }: { item: Conversation }) => (
+  // TODO(api): unread counts need read receipts on the API (not tracked yet); no badge until then.
+  const renderItem = ({ item }: { item: ConversationDto }) => (
     <Row
       icon="person-circle"
       title={formatPhone(item.peer)}
-      subtitle={item.lastMessage}
-      label={`${formatPhone(item.peer)}, ${item.lastMessage}, ${formatWhen(item.lastAt, locale, t)}`}
+      subtitle={item.lastMessage.preview}
+      label={`${formatPhone(item.peer)}, ${item.lastMessage.preview}, ${formatWhen(item.lastMessageAt, locale, t)}`}
       onPress={() => router.push(`/thread/${encodeURIComponent(item.peer)}`)}
       right={
         <View style={{ alignItems: "flex-end" }}>
-          <Text style={styles.when}>{formatWhen(item.lastAt, locale, t)}</Text>
-          {item.unread > 0 ? <Text style={styles.badge}>{item.unread}</Text> : null}
+          <Text style={styles.when}>{formatWhen(item.lastMessageAt, locale, t)}</Text>
         </View>
       }
     />
@@ -42,7 +42,7 @@ export default function Messages() {
       {list.errorKey ? <ErrorText>{t(list.errorKey)}</ErrorText> : null}
       <FlatList
         data={list.data ?? []}
-        keyExtractor={(c) => c.id}
+        keyExtractor={(c) => `${c.ourNumber}|${c.peer}`}
         renderItem={renderItem}
         contentContainerStyle={{ paddingHorizontal: spacing.md }}
         refreshControl={<RefreshControl refreshing={list.loading} onRefresh={list.reload} tintColor={colors.electric} />}
@@ -56,15 +56,4 @@ export default function Messages() {
 const styles = StyleSheet.create({
   header: { paddingHorizontal: spacing.md, paddingTop: spacing.md },
   when: { color: colors.silver, fontSize: 13 },
-  badge: {
-    marginTop: 4,
-    backgroundColor: colors.electric,
-    color: colors.navy,
-    fontWeight: "800",
-    borderRadius: 12,
-    minWidth: 24,
-    textAlign: "center",
-    overflow: "hidden",
-    paddingHorizontal: 6,
-  },
 });
