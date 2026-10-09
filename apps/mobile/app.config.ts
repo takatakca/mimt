@@ -1,0 +1,109 @@
+import type { ConfigContext, ExpoConfig } from "expo/config";
+
+// Build-time configuration. Values here come from the environment (local .env or EAS env vars).
+// Nothing secret belongs in this file or in EXPO_PUBLIC_* variables: they ship inside the app.
+
+const env = process.env;
+
+// Google's public sample AdMob app ids (test only). Real ids go in EAS env vars at launch.
+const ADMOB_ANDROID_TEST_APP_ID = "ca-app-pub-3940256099942544~3347511713";
+const ADMOB_IOS_TEST_APP_ID = "ca-app-pub-3940256099942544~1458002511";
+
+const apsEnvironment = env.APS_ENVIRONMENT === "production" ? "production" : "development";
+
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  ...config,
+  name: "MIMT",
+  slug: "mimt",
+  scheme: "mimt",
+  version: "0.1.0",
+  platforms: ["ios", "android"],
+  orientation: "portrait",
+  userInterfaceStyle: "dark",
+  backgroundColor: "#060D1F",
+  // TODO(brand): add icon and splash image from knowledgeAI/brand/ (official TAKATAK files) once uploaded.
+  ios: {
+    bundleIdentifier: "ca.mimt.app",
+    supportsTablet: false,
+    entitlements: { "aps-environment": apsEnvironment },
+    infoPlist: {
+      CFBundleDevelopmentRegion: "fr",
+      CFBundleLocalizations: ["fr", "en"],
+      NSContactsUsageDescription:
+        "MIMT utilise vos contacts pour vous aider à appeler et à texter vos proches. / MIMT uses your contacts to help you call and text people.",
+      NSMicrophoneUsageDescription:
+        "MIMT utilise le micro pour vos appels. / MIMT uses the microphone for your calls.",
+      NSPhotoLibraryUsageDescription:
+        "MIMT accède à vos photos pour les joindre à un message (MMS). / MIMT accesses your photos to attach them to a message (MMS).",
+      ITSAppUsesNonExemptEncryption: false,
+    },
+  },
+  android: {
+    package: "ca.mimt.app",
+    googleServicesFile: env.GOOGLE_SERVICES_JSON,
+    permissions: [
+      "android.permission.RECORD_AUDIO",
+      "android.permission.READ_CONTACTS",
+      "android.permission.POST_NOTIFICATIONS",
+      "android.permission.MODIFY_AUDIO_SETTINGS",
+    ],
+    adaptiveIcon: { backgroundColor: "#060D1F" },
+  },
+  plugins: [
+    "expo-router",
+    ["expo-splash-screen", { backgroundColor: "#060D1F" }],
+    "expo-secure-store",
+    "expo-localization",
+    "expo-web-browser",
+    [
+      "@twilio/voice-react-native-sdk",
+      {
+        microphoneUsageDescription: "MIMT utilise le micro pour vos appels. / MIMT uses the microphone for your calls.",
+        apsEnvironment,
+      },
+    ],
+    [
+      "expo-contacts",
+      {
+        contactsPermission:
+          "MIMT utilise vos contacts pour vous aider à appeler et à texter vos proches. / MIMT uses your contacts to help you call and text people.",
+      },
+    ],
+    [
+      "expo-audio",
+      { microphonePermission: "MIMT utilise le micro pour vos appels. / MIMT uses the microphone for your calls." },
+    ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "MIMT accède à vos photos pour les joindre à un message (MMS). / MIMT accesses your photos to attach them to a message (MMS).",
+        cameraPermission: false,
+        microphonePermission: false,
+      },
+    ],
+    ["expo-notifications", { color: "#1F8BFF", defaultChannel: "messages", mode: apsEnvironment }],
+    [
+      "expo-tracking-transparency",
+      {
+        userTrackingPermission:
+          "Si vous l'autorisez, les annonces de la version gratuite pourront être personnalisées. Sinon, elles restent non personnalisées. / If you allow it, ads in the free plan can be personalised. Otherwise they stay non-personalised.",
+      },
+    ],
+    [
+      "react-native-google-mobile-ads",
+      {
+        androidAppId: env.ADMOB_ANDROID_APP_ID ?? ADMOB_ANDROID_TEST_APP_ID,
+        iosAppId: env.ADMOB_IOS_APP_ID ?? ADMOB_IOS_TEST_APP_ID,
+        // Ads must not start before consent (UMP / Law 25).
+        delayAppMeasurementInit: true,
+        userTrackingUsageDescription:
+          "Si vous l'autorisez, les annonces de la version gratuite pourront être personnalisées. Sinon, elles restent non personnalisées. / If you allow it, ads in the free plan can be personalised. Otherwise they stay non-personalised.",
+      },
+    ],
+  ],
+  experiments: { typedRoutes: false },
+  extra: {
+    eas: env.EAS_PROJECT_ID ? { projectId: env.EAS_PROJECT_ID } : undefined,
+  },
+});

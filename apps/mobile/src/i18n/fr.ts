@@ -1,0 +1,238 @@
+// Français (Canada) — langue par défaut et de référence. Toute clé ajoutée ici doit l'être aussi dans en.ts
+// (le compilateur et le test i18n.test.ts le vérifient). Vocabulaire québécois : courriel, texto,
+// messagerie vocale, composer, cellulaire.
+
+export const fr = {
+  // Général
+  "app.name": "MIMT",
+  "app.by": "par GROUPE TAKATAK",
+  "common.continue": "Continuer",
+  "common.cancel": "Annuler",
+  "common.retry": "Réessayer",
+  "common.save": "Enregistrer",
+  "common.back": "Retour",
+  "common.close": "Fermer",
+  "common.loading": "Chargement…",
+  "common.delete": "Supprimer",
+  "common.confirm": "Confirmer",
+  "common.empty": "Rien pour l'instant.",
+  "common.today": "Aujourd'hui",
+  "common.yesterday": "Hier",
+
+  // Accueil / bienvenue
+  "welcome.title": "Votre numéro canadien, dans votre poche",
+  "welcome.body": "Appels et textos au Canada et aux États-Unis, par Wi-Fi ou données cellulaires. Messagerie vocale incluse.",
+  "welcome.e911":
+    "MIMT n'est pas un service téléphonique traditionnel : les appels au 9-1-1 ont des limites. Vous les lirez et les accepterez avant d'appeler.",
+  "welcome.start": "Commencer",
+
+  // Connexion
+  "signin.title": "Connexion",
+  "signin.takatak": "Continuer avec TAKATAK",
+  "signin.takatakHint": "Ouvre la page de connexion sécurisée de TAKATAK.",
+  "signin.sms": "Recevoir un code par texto",
+  "signin.notConfigured": "La connexion TAKATAK n'est pas encore configurée dans cette version.",
+  "signin.cancelled": "Connexion annulée.",
+  "signin.terms": "En continuant, vous acceptez les conditions d'utilisation et la politique de confidentialité de MIMT.",
+
+  // Code par texto
+  "otp.title": "Connexion par texto",
+  "otp.phoneLabel": "Votre numéro de cellulaire",
+  "otp.phonePlaceholder": "514 555-0123",
+  "otp.send": "Envoyer le code",
+  "otp.codeLabel": "Code reçu par texto",
+  "otp.codePlaceholder": "123456",
+  "otp.verify": "Valider le code",
+  "otp.sentTo": "Code envoyé au {phone}.",
+  "otp.resend": "Renvoyer le code",
+  "otp.invalidPhone": "Entrez un numéro canadien ou américain à 10 chiffres.",
+
+  // Adresse 9-1-1
+  "address.title": "Adresse pour le 9-1-1",
+  "address.intro":
+    "Le centre d'urgence utilise cette adresse civique si vous ne pouvez pas parler. Gardez-la à jour chaque fois que vous changez d'endroit.",
+  "address.street": "Numéro et rue",
+  "address.streetPlaceholder": "1234, rue Sainte-Catherine Ouest",
+  "address.unit": "Appartement ou bureau (facultatif)",
+  "address.city": "Ville",
+  "address.province": "Province ou territoire",
+  "address.postalCode": "Code postal",
+  "address.postalPlaceholder": "H3B 1A1",
+  "address.invalidPostal": "Code postal invalide. Format : A1A 1A1.",
+  "address.required": "Ce champ est obligatoire.",
+  "address.saved": "Adresse 9-1-1 enregistrée.",
+
+  // Avis 9-1-1
+  "notice.title": "Limites du service 9-1-1",
+  "notice.intro": "Lisez attentivement cet avis. Vous devez l'accepter avant d'utiliser MIMT pour appeler.",
+  "notice.version": "Version de l'avis : {version}",
+  "notice.accept": "J'ai lu et j'accepte les limites du service 9-1-1 décrites ci-dessus.",
+  "notice.mustAccept": "Cochez la case pour continuer.",
+  "notice.loadError": "Impossible de charger l'avis 9-1-1. Vous ne pouvez pas continuer sans le lire.",
+
+  // Choix du numéro
+  "number.title": "Choisissez votre numéro",
+  "number.areaCode": "Indicatif régional",
+  "number.available": "Numéros disponibles",
+  "number.none": "Aucun numéro disponible pour cet indicatif. Essayez-en un autre.",
+  "number.choose": "Prendre ce numéro",
+  "number.confirm": "Prendre le {number} ?",
+
+  // Fin de l'accueil
+  "done.title": "C'est prêt!",
+  "done.body": "Votre numéro MIMT est le {number}. Vous pouvez appeler et texter dès maintenant.",
+  "done.go": "Aller à mes messages",
+
+  // Onglets
+  "tabs.messages": "Messages",
+  "tabs.calls": "Appels",
+  "tabs.voicemail": "Messagerie vocale",
+  "tabs.voicemailShort": "Messagerie",
+  "tabs.contacts": "Contacts",
+  "tabs.account": "Compte",
+
+  // Messages
+  "messages.title": "Messages",
+  "messages.new": "Nouveau texto",
+  "messages.empty": "Aucune conversation. Envoyez votre premier texto!",
+  "messages.to": "À",
+  "messages.toPlaceholder": "Numéro ou nom",
+  "messages.placeholder": "Écrire un texto",
+  "messages.send": "Envoyer",
+  "messages.attach": "Joindre une photo (MMS)",
+  "messages.attachPremium": "Les photos (MMS) sont incluses dans Premium.",
+  "messages.failed": "Non envoyé. Touchez pour réessayer.",
+  "messages.sending": "Envoi…",
+  "messages.invalidTo": "Entrez un numéro valide à 10 chiffres.",
+  "messages.call": "Appeler ce contact",
+
+  // Appels
+  "calls.title": "Appels",
+  "calls.recents": "Récents",
+  "calls.keypad": "Clavier",
+  "calls.empty": "Aucun appel récent.",
+  "calls.incoming": "Entrant",
+  "calls.outgoing": "Sortant",
+  "calls.missed": "Manqué",
+  "calls.call": "Appeler",
+  "calls.callNumber": "Appeler le {number}",
+  "calls.delete": "Effacer le dernier chiffre",
+  "calls.contacts": "Choisir un contact",
+  "calls.noPhone": "Ce contact n'a pas de numéro de téléphone.",
+  "calls.blockedNoE911": "Enregistrez votre adresse 9-1-1 et acceptez l'avis avant d'appeler.",
+  "calls.key": "Touche {key}",
+
+  // Appel en cours
+  "call.connecting": "Connexion…",
+  "call.ringing": "Ça sonne…",
+  "call.connected": "En communication",
+  "call.reconnecting": "Reconnexion…",
+  "call.ended": "Appel terminé",
+  "call.incoming": "Appel entrant",
+  "call.accept": "Répondre",
+  "call.reject": "Refuser",
+  "call.hangup": "Raccrocher",
+  "call.mute": "Sourdine",
+  "call.unmute": "Réactiver le micro",
+  "call.speaker": "Haut-parleur",
+  "call.keypad": "Clavier",
+  "call.hideKeypad": "Masquer le clavier",
+  "call.hold": "Attente",
+  "call.resume": "Reprendre",
+  "call.failed": "L'appel a échoué.",
+  "call.emergencyBanner": "Appel d'urgence — donnez votre adresse à la téléphoniste",
+  "call.emergencyHint": "Composer le 9-1-1 est toujours permis, peu importe votre forfait ou votre crédit.",
+  "call.devBuildOnly": "Les appels exigent une version de développement (pas Expo Go).",
+
+  // Messagerie vocale
+  "voicemail.title": "Messagerie vocale",
+  "voicemail.empty": "Aucun message vocal.",
+  "voicemail.play": "Écouter",
+  "voicemail.pause": "Pause",
+  "voicemail.transcript": "Transcription",
+  "voicemail.noTranscript": "La transcription est incluse dans Premium.",
+  "voicemail.callBack": "Rappeler",
+  "voicemail.duration": "{seconds} s",
+  "voicemail.deleteConfirm": "Supprimer ce message vocal?",
+
+  // Contacts
+  "contacts.title": "Contacts",
+  "contacts.permissionTitle": "Accès à vos contacts",
+  "contacts.permissionBody":
+    "MIMT peut afficher vos contacts pour vous aider à appeler et à texter. Ils restent sur votre appareil et ne sont pas envoyés à nos serveurs.",
+  "contacts.allow": "Autoriser l'accès",
+  "contacts.denied": "Accès refusé. Vous pouvez l'autoriser dans les réglages de l'appareil.",
+  "contacts.search": "Rechercher",
+  "contacts.empty": "Aucun contact avec un numéro de téléphone.",
+  "contacts.call": "Appeler {name}",
+  "contacts.text": "Texter {name}",
+
+  // Compte
+  "account.title": "Compte",
+  "account.plan": "Votre forfait",
+  "account.number": "Votre numéro",
+  "account.perMonth": "{price} / mois",
+  "account.free": "Gratuit",
+  "account.usage": "Utilisation ce mois-ci",
+  "account.usageOutMin": "Minutes sortantes",
+  "account.usageInMin": "Minutes entrantes",
+  "account.usageSms": "Textos envoyés",
+  "account.usageOf": "{used} sur {cap}",
+  "account.usageWarn": "Vous approchez de la limite de votre forfait.",
+  "account.usageFull": "Limite atteinte. Le 9-1-1 reste toujours disponible.",
+  "account.upgrade": "Passer à {plan}",
+  "account.upgradeHint": "Le paiement s'ouvre dans une page sécurisée.",
+  "account.reward": "Gagnez 10 minutes",
+  "account.rewardHint": "Regardez une courte annonce pour obtenir 10 minutes d'appel de plus.",
+  "account.rewardLoading": "Annonce en préparation…",
+  "account.rewardDone": "10 minutes ajoutées à votre compte!",
+  "account.rewardFailed": "L'annonce n'est pas disponible pour le moment.",
+  "account.settings": "Réglages",
+  "account.language": "Langue",
+  "account.languageFr": "Français",
+  "account.languageEn": "English",
+  "account.e911Address": "Adresse 9-1-1",
+  "account.e911Notice": "Relire l'avis 9-1-1",
+  "account.privacy": "Confidentialité et consentements",
+  "account.export": "Exporter mes données",
+  "account.exportStarted": "Votre export est prêt. Il s'ouvre dans le navigateur.",
+  "account.delete": "Supprimer mon compte",
+  "account.deleteConfirm":
+    "Votre compte, votre numéro, vos textos et vos messages vocaux seront supprimés. Cette action est définitive. Continuer?",
+  "account.deleted": "Votre compte a été supprimé.",
+  "account.complaints": "Plaintes : CPRST (Commission des plaintes relatives aux services de télécom-télévision)",
+  "account.complaintsHint": "Si nous ne réglons pas votre plainte, la CPRST peut vous aider gratuitement.",
+  "account.support": "Soutien MIMT",
+  "account.logout": "Se déconnecter",
+  "account.version": "Version {version}",
+
+  // Confidentialité
+  "privacy.title": "Confidentialité et consentements",
+  "privacy.intro":
+    "Chaque consentement est distinct et facultatif. Vous pouvez le retirer en tout temps (Loi 25).",
+  "privacy.adsPersonalised": "Annonces personnalisées",
+  "privacy.adsPersonalisedHint":
+    "Désactivé par défaut. Sans votre accord, les annonces de la version gratuite restent non personnalisées.",
+  "privacy.marketing": "Courriels et textos promotionnels de MIMT",
+  "privacy.marketingHint": "Offres et nouveautés. Désabonnement en tout temps (LCAP).",
+  "privacy.adChoices": "Gérer les choix publicitaires (Google)",
+  "privacy.policy": "Lire la politique de confidentialité",
+  "privacy.saved": "Préférence enregistrée.",
+
+  // Erreurs
+  "error.network": "Pas de connexion Internet. Vérifiez votre Wi-Fi ou vos données cellulaires.",
+  "error.session": "Votre session a expiré. Connectez-vous de nouveau.",
+  "error.forbidden": "Vous n'avez pas accès à cette fonction.",
+  "error.notFound": "Élément introuvable.",
+  "error.rateLimited": "Trop de tentatives. Patientez quelques minutes.",
+  "error.capReached": "Vous avez atteint la limite de votre forfait ce mois-ci.",
+  "error.e911Required": "Enregistrez votre adresse 9-1-1 et acceptez l'avis avant d'appeler ou de texter.",
+  "error.invalidCode": "Code invalide ou expiré.",
+  "error.numberTaken": "Ce numéro vient d'être pris. Choisissez-en un autre.",
+  "error.featureRequired": "Cette fonction n'est pas incluse dans votre forfait.",
+  "error.validation": "Certains renseignements sont invalides. Vérifiez le formulaire.",
+  "error.server": "Le service est temporairement indisponible. Réessayez plus tard.",
+  "error.generic": "Une erreur est survenue. Réessayez.",
+} as const;
+
+export type TKey = keyof typeof fr;

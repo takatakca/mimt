@@ -1,0 +1,215 @@
+// Typed client for the MIMT API (apps/api). Handles bearer tokens, single-flight refresh on expiry
+// or 401, and maps every failure to a translated message key (see errors.ts).
+import Constants from "expo-constants";
+import type { PlanCode } from "@mimt/shared";
+import { ApiClientError, errorKeyFor } from "./errors";
+import { clearSession, loadSession, saveSession, toSession, type StoredSession } from "./tokens";
+import type {
+  AuthTokens,
+  AvailableNumber,
+  CallRecord,
+  CheckoutRequest,
+  ConsentRequest,
+  Conversation,
+  E911AckRequest,
+  E911Address,
+  E911Notice,
+  Locale,
+  MeResponse,
+  Message,
+  SendMessageRequest,
+  TakatakExchangeRequest,
+  Voicemail,
+  VoiceTokenResponse,
+} from "./types";
+
+export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? "https://api.mimt.ca").replace(/\/+$/, "");
+export const APP_VERSION = Constants.expoConfig?.version ?? "0.0.0";
+
+type Method = "GET" | "POST" | "PUT" | "DELETE";
+interface RequestOptions {
+  body?: unknown;
+  auth?: boolean;
+  query?: Record<string, string | undefined>;
+}
+
+let session: StoredSession | null = null;
+let sessionLoaded = false;
+let refreshing: Promise<StoredSession | null> | null = null;
+let acceptLanguage: Locale = "fr-CA";
+const signedOutListeners = new Set<() => void>();
+
+/** Called when the refresh token is rejected: the app must go back to sign-in. */
+export function onSignedOut(listener: () => void): () => void {
+  signedOutListeners.add(listener);
+  return () => signedOutListeners.delete(listener);
+}
+
+export function setApiLocale(locale: Locale): void {
+  acceptLanguage = locale;
+}
+
+async function getSession(): Promise<StoredSession | null> {
+  if (!sessionLoaded) {
+    session = await loadSession();
+    sessionLoaded = true;
+  }
+  return session;
+}
+
+export async function hasSession(): Promise<boolean> {
+  return (await getSession()) !== null;
+}
+
+export async function setTokens(tokens: AuthTokens): Promise<void> {
+  session = toSession(tokens);
+  sessionLoaded = true;
+  await saveSession(session);
+}
+
+export async function signOutLocally(): Promise<void> {
+  session = null;
+  sessionLoaded = true;
+  await clearSession();
+  signedOutListeners.forEach((l) => l());
+}
+
+function buildUrl(path: string, query?: Record<string, string | undefined>): string {
+  const qs = query
+    ? Object.entries(query)
+        .filter((e): e is [string, string] => e[1] !== undefined)
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join("&")
+    : "";
+  return `${API_URL}${path}${qs ? `?${qs}` : ""}`;
+}
+
+async function rawFetch(method: Method, path: string, opts: RequestOptions, accessToken?: string): Promise<Response> {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "Accept-Language": acceptLanguage,
+    "X-App-Version": APP_VERSION,
+  };
+  if (opts.body !== undefined) headers["Content-Type"] = "application/json";
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+  try {
+    return await fetch(buildUrl(path, opts.query), {
+      method,
+      headers,
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    });
+  } catch (e) {
+    throw new ApiClientError(null, "network", "error.network", e instanceof Error ? e.message : "network error");
+  }
+}
+
+async function refreshSession(): Promise<StoredSession | null> {
+  if (!refreshing) {
+    refreshing = (async () => {
+      const current = await getSession();
+      if (!current) return null;
+      const res = await rawFetch("POST", "/v1/auth/refresh", { body: { refreshToken: current.refreshToken } });
+      if (!res.ok) {
+        if (res.status === 400 || res.status === 401 || res.status === 403) await signOutLocally();
+        return null;
+      }
+      const tokens = (await res.json()) as AuthTokens;
+      await setTokens(tokens);
+      return session;
+    })().finally(() => {
+      refreshing = null;
+    });
+  }
+  return refreshing;
+}
+
+async function validAccessToken(): Promise<string | undefined> {
+  const s = await getSession();
+  if (!s) return undefined;
+  if (s.expiresAt - 30_000 > Date.now()) return s.accessToken;
+  return (await refreshSession())?.accessToken;
+}
+
+async function toError(res: Response): Promise<ApiClientError> {
+  let code: string | null = null;
+  let message = res.statusText;
+  try {
+    const body = (await res.json()) as { error?: string; message?: string };
+    code = body.error ?? null;
+    message = body.message ?? message;
+  } catch {
+    // Non-JSON error body.
+  }
+  return new ApiClientError(res.status, code, errorKeyFor(res.status, code), message);
+}
+
+export async function request<T>(method: Method, path: string, opts: RequestOptions = {}): Promise<T> {
+  const auth = opts.auth ?? true;
+  let res = await rawFetch(method, path, opts, auth ? await validAccessToken() : undefined);
+  if (auth && res.status === 401) {
+    const refreshed = await refreshSession();
+    if (!refreshed) throw new ApiClientError(401, "unauthorized", "error.session", "session expired");
+    res = await rawFetch(method, path, opts, refreshed.accessToken);
+  }
+  if (!res.ok) throw await toError(res);
+  if (res.status === 204) return undefined as T;
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
+}
+
+// ---------------------------------------------------------------------------------------- endpoints
+
+export const api = {
+  // Auth (flow A in docs/MIMT-MVP.md §4: the API exchanges the code server-to-server).
+  takatakExchange: (body: TakatakExchangeRequest) =>
+    request<AuthTokens>("POST", "/v1/auth/takatak/exchange", { body, auth: false }),
+  otpStart: (phone: string) => request<void>("POST", "/v1/auth/otp/start", { body: { phone }, auth: false }),
+  otpVerify: (phone: string, code: string) =>
+    request<AuthTokens>("POST", "/v1/auth/otp/verify", { body: { phone, code }, auth: false }),
+  logout: () => request<void>("POST", "/v1/auth/logout"),
+
+  me: () => request<MeResponse>("GET", "/v1/me"),
+  updateMe: (body: { locale: Locale }) => request<void>("PUT", "/v1/me", { body }),
+  exportData: () => request<{ url: string }>("POST", "/v1/me/export"),
+  deleteAccount: () => request<void>("DELETE", "/v1/me"),
+  setConsent: (body: ConsentRequest) => request<void>("POST", "/v1/consents", { body }),
+
+  // 9-1-1
+  getE911Address: () => request<E911Address>("GET", "/v1/e911/address"),
+  putE911Address: (body: E911Address) => request<void>("PUT", "/v1/e911/address", { body }),
+  e911Notice: (locale: Locale) => request<E911Notice>("GET", "/v1/e911/notice", { query: { locale } }),
+  e911Ack: (body: E911AckRequest) => request<void>("POST", "/v1/e911/ack", { body }),
+
+  // Numbers
+  availableNumbers: (areaCode: string) =>
+    request<{ numbers: AvailableNumber[] }>("GET", "/v1/numbers/available", { query: { areaCode } }),
+  claimNumber: (e164: string) => request<{ id: string; e164: string }>("POST", "/v1/numbers", { body: { e164 } }),
+
+  // Voice
+  voiceToken: () => request<VoiceTokenResponse>("GET", "/v1/voice/token"),
+  calls: () => request<{ calls: CallRecord[] }>("GET", "/v1/calls"),
+
+  // Messaging
+  conversations: () => request<{ conversations: Conversation[] }>("GET", "/v1/conversations"),
+  messages: (peer: string) => request<{ messages: Message[] }>("GET", `/v1/conversations/${encodeURIComponent(peer)}/messages`),
+  sendMessage: (body: SendMessageRequest & { mediaUrls?: string[] }) => request<Message>("POST", "/v1/messages", { body }),
+
+  // Voicemail
+  voicemails: () => request<{ voicemails: Voicemail[] }>("GET", "/v1/voicemails"),
+  deleteVoicemail: (id: string) => request<void>("DELETE", `/v1/voicemails/${encodeURIComponent(id)}`),
+
+  // Billing (web checkout via Stripe). TODO(store-billing): consumer plans bought inside the iOS/Android
+  // app must use Apple/Google in-app purchases (MIMT-MVP §6); this web checkout is for business plans
+  // and for testing until IAP is wired.
+  checkout: (plan: PlanCode, returnUrl: string) =>
+    request<{ url: string }>("POST", "/v1/billing/checkout", { body: { plan, returnUrl } satisfies CheckoutRequest }),
+
+  // Rewarded ads. TODO(server): the API must only credit minutes after Google's server-side
+  // verification (SSV) callback; this call alone must never be trusted.
+  claimReward: (body: { kind: "rewarded_ad_10min"; adUnitId: string }) =>
+    request<{ creditedMinutes: number }>("POST", "/v1/rewards/claim", { body }),
+
+  // Push (expo-notifications device token for message notifications; VoIP push is Twilio's).
+  registerPush: (body: { token: string; platform: "ios" | "android"; kind: "messages" }) =>
+    request<void>("POST", "/v1/push/register", { body }),
+};
