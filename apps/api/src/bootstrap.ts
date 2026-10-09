@@ -4,7 +4,10 @@ import type { AppDeps } from "./deps.js";
 import { loadSigningKey, SessionService } from "./auth/sessions.js";
 import { TakatakOidc } from "./auth/takatak.js";
 import { InMemoryRateLimiter } from "./fraud/rateLimiter.js";
+import { admobKeyLoader } from "./ads/ssv.js";
+import { createDeviceVerifier } from "./devices/verify.js";
 import { StripeGateway } from "./gateways/billing.js";
+import { SupabaseMediaStore } from "./gateways/media.js";
 import { TwilioRestGateway } from "./gateways/twilio.js";
 import { MessageCipher } from "./lib/crypto.js";
 import { REDACT_PATHS } from "./logger.js";
@@ -38,6 +41,9 @@ export function createDeps(config: Config, log: Logger): AppDeps {
   if (!twilio) log.warn("Twilio not configured: voice, numbers and messaging answer 503");
   const billing = stripeConfigured(config) ? new StripeGateway(config.STRIPE_SECRET_KEY!, config.STRIPE_WEBHOOK_SECRET!) : null;
   if (!billing) log.warn("Stripe not configured: billing answers 503");
+  const media =
+    config.SUPABASE_URL && config.SUPABASE_SERVICE_ROLE_KEY ? new SupabaseMediaStore(config.SUPABASE_URL, config.SUPABASE_SERVICE_ROLE_KEY) : null;
+  if (!media) log.warn("Supabase Storage not configured: voicemail audio stays at Twilio until it is copied");
 
   return {
     config,
@@ -46,6 +52,9 @@ export function createDeps(config: Config, log: Logger): AppDeps {
     takatak: new TakatakOidc(config, repo),
     twilio,
     billing,
+    media,
+    deviceVerifier: createDeviceVerifier(config),
+    admobKeys: admobKeyLoader(config.ADMOB_SSV_KEYS_URL),
     cipher: new MessageCipher(cipherKey),
     rateLimiter: new InMemoryRateLimiter(),
     notifier: new LogNotifier(log),

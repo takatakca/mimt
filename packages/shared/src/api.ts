@@ -308,7 +308,7 @@ export interface BillingPortalResponse {
 
 // ------------------------------------------------------------------------------------------ rewards
 
-/** POST /v1/rewards/claim — answers 501 not_implemented until AdMob SSV verification exists. */
+/** POST /v1/rewards/claim — credits minutes only after AdMob's signed callback has arrived. */
 export interface RewardClaimRequest {
   kind: "rewarded_ad_10min";
   adUnitId: string;

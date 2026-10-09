@@ -349,6 +349,14 @@ export interface Repository {
   /** Records a single-use identifier (JWT jti, Stripe event id). False if already seen. */
   useOnce(key: string, expiresAt: Date): Promise<boolean>;
 
+  /** Binds an attested device to this user. "taken" when another user already has it. */
+  bindDevice(input: { platform: "ios" | "android"; deviceKey: string; userId: string; verifiedAt: Date }): Promise<"ok" | "taken">;
+  /** Inserts a verified ad reward. False when the transaction was already stored. */
+  grantAdReward(input: { userId: string; transactionId: string; minutes: number; createdAt: Date }): Promise<boolean>;
+  countAdRewardsSince(userId: string, since: Date): Promise<number>;
+  /** Marks the oldest unclaimed reward as claimed. */
+  claimAdReward(userId: string, at: Date): Promise<{ transactionId: string; minutes: number } | null>;
+
   setOptOut(ourNumber: string, peer: string, optedOut: boolean): Promise<void>;
   isOptedOut(ourNumber: string, peer: string): Promise<boolean>;
 
