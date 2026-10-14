@@ -23,3 +23,5 @@ Mise à jour : 2026-10-14. Distinguer décisions approuvées, orientations de co
 - Qui héberge le site public, comment accéder à sa racine documentaire, et si la synchronisation remplace le site en place ou passe par un staging.
 - CRTC/CCTS, accès à Twilio production, routage 9-1-1, magasins Apple/Google, capacité PBX Affaires.
 - Validation du canal d'envoi (courriel, API) et du processus de double confirmation marketing avant toute campagne.
+
+**Vérification 2026-10-14 :** aucun projet MIMT n'apparaît dans les cinq projets de la connexion Supabase accessible. On ne réutilise **pas** TAKATAK STAGING comme base télécom MIMT.

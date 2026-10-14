@@ -19,3 +19,5 @@ Appliquer : `supabase db push` (CLI liée au projet) ou `psql "$DATABASE_URL" -f
 - The API connects with the service-role/direct connection string and enforces access itself.
 - Apply with `supabase db push` or `psql "$DATABASE_URL" -f migrations/0001_init.sql`.
 - Local check without Supabase: create roles `anon`, `authenticated`, `service_role` and a stub `auth.uid()` function first (see `apps/api/README.md`, "Tests against Postgres").
+
+**Attention CLI :** les migrations historiques du dépôt sont préfixées `0001`–`0004` plutôt qu'avec un timestamp de 14 chiffres. Utiliser le chemin SQL explicite `psql -f ...` avec contrôle de schéma avant toute bascule, ou vérifier/normaliser le format auprès du Supabase CLI courant; ne pas supposer qu'un `supabase db push` acceptera automatiquement ces anciennes versions. Pour toute migration future, utiliser `supabase migration new <nom>` puis contrôler l'historique des migrations.

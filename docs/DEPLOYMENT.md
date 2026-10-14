@@ -44,3 +44,5 @@ Le workflow `.github/workflows/deploy-api.yml` déclenche un **déploiement Cool
 Paramètres : variable GitHub `MIMT_API_DEPLOY_ENABLED`; secrets `MIMT_COOLIFY_DEPLOY_WEBHOOK` (URL exacte de la ressource MIMT) et `MIMT_COOLIFY_DEPLOY_TOKEN` (jeton limité à la permission `deploy`). Ne configurer qu'après avoir créé l'application Coolify pour `main`, avec `apps/api/Dockerfile` et le port interne `8080`, les migrations et les secrets API. Un déclenchement du webhook n'est jamais considéré comme une publication réussie sans contrôle de révision et de santé.
 
 Références : documentation officielle Coolify Deploy Webhooks et Get Deployment by UUID.
+
+**État des accès (2026-10-14) :** la connexion Supabase accessible ne contient pas de projet nommé MIMT. Il est interdit d'appliquer les migrations MIMT à TAKATAK STAGING ou à un projet d'un autre produit. Il faut d'abord créer/identifier le projet Supabase dédié à MIMT et vérifier qu'il appartient à la bonne organisation.

@@ -13,8 +13,8 @@ Un commit dans GitHub n'est **pas** une preuve de déploiement. Les états « co
 | API télécom | Fastify, TAKATAK OIDC, Twilio voix/SMS, facturation, 9-1-1, anti-fraude | CI existante, mais pas de test opérateur/transporteur réel | `https://api.mimt.ca/healthz` non confirmé |
 | Application mobile | Expo, VoIP, messages, adresse 9-1-1, achats | Tests unitaires; builds/signatures magasins non attestés | Aucune disponibilité commerciale validée |
 | App Web | Page de présentation disponible; implémentation du softphone à confirmer | `https://app.mimt.ca/` répond sur le Web mais les parcours d'appel ne sont pas vérifiés | **Ne pas annoncer comme opérationnel** |
-| Base de données | Migrations `0001` à `0004`; RLS, séparation des rôles | Projet Supabase Canada non confirmé, aucune migration réellement appliquée ici | À configurer |
-| Déploiement site | `Deploy MIMT Website`, synchronisation SSH sur CI validée | Dernières exécutions **skipped** ; variables et marqueur nécessaires | Automatisation non activée |
+| Base de données | Migrations `0001` à `0004`; RLS, séparation des rôles | La connexion Supabase interrogée le 2026-10-14 liste cinq projets, **aucun nommé MIMT**; aucune migration MIMT appliquée ici | À configurer |
+| Déploiement site | `Deploy MIMT Website`, synchronisation SSH sur CI validée | Dernières exécutions **skipped**, également pour le nouveau CD Coolify API ; variables et marqueur nécessaires | Automatisation non activée |
 | Juridique/CRTC | Textes préparatoires et dossier de recherche | Revue d'avocat et tests d'urgence fournisseur non confirmés | Blocage de lancement télécom |
 
 ## Frontières et sécurité
