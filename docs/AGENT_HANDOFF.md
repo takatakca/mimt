@@ -1,6 +1,20 @@
 # MIMT — Relève automatique d'agent
 
-**Date du constat :** 2026-10-14. **Dépôt :** `takatakca/mimt`. **Branche :** `main`. Source de vérité : GitHub, consulter `git rev-parse HEAD` ou l'API de la branche **avant toute écriture**. Une tâche de reprise **horaire** (« MIMT — Reprise GitHub ») a été configurée via l'orchestrateur de tâches le 2026-10-14. Ce fichier n'exécute rien à lui seul et la fréquence horaire n'est pas un traitement permanent.
+**Date du constat :** 2026-10-14.
+
+## Relève la plus récente — WEB-01, 14 octobre 2026
+
+- **Dernière tâche code terminée :** durcissement de `.github/workflows/deploy-web.yml` au commit `100e29e7a707024c3f9a80869958fd1677d78184`, parité IA au commit `53c71675de05e24b9f01b652f38d0e7b08396acf`, comparateur au commit `fda2694dacccb85a19a9fd24dcf0d0abf05522f3` et audit `docs/WEB_PARITY_AUDIT.md` au commit `756ada90bc8f0d6cb890b1ea504494d2878bb52a`. Le SHA HEAD continuera à évoluer lors de la mise à jour de cette relève : lire `main`.
+- **Tâche actuelle :** terminer la validation de parité du contenu du site public dans les deux langues et la vérification d'intégration des services. Ne pas remplacer silencieusement la version en ligne.
+- **CI confirmée :** le commit `100e29e` (sauvegarde avant publication) a réussi; les CI du code contenu `53c71675`, `fda2694d`, et de l'audit `756ada90` étaient en cours/en file au contrôle, vérifier les résultats GitHub Actions. Les workflows `Deploy MIMT Website` / `Deploy MIMT API` étaient `skipped`, non publiés.
+- **Fichiers touchés :** `WORKLOG.md`, `apps/web/components/pages/AiPage.tsx`, `ComparePage.tsx`, `.github/workflows/deploy-web.yml`, `docs/WEB_PARITY_AUDIT.md`, les cinq fichiers de relève, `apps/web/README.md`.
+- **Vérifications effectuées :** API GitHub de `main`, workflows (CI et CD), issues/PR ouverts (aucun); consultation web des pages `mimt.ca/`, `/ia/`, `/comparer/`, `/app-web/`; page anglaise non vérifiable via l'outil web. Aucun test SSH, Twilio, Supabase DB ou vrai 9-1-1 exécuté.
+- **Problèmes ouverts :** le site live annonce un fournisseur IA et des plafonds qui ne sont pas validés dans GitHub. L'API `api.mimt.ca/healthz` et le hash `mimt.ca/deploy-version.txt` n'ont pas été vérifiés accessibles; pas de projet Supabase MIMT confirmé. `MIMT_WEB_PARITY_REVIEWED` doit être validée avant publication, et le marqueur distant doit contenir exactement `mimt.ca`.
+- **Prochaine action exacte :** 1) vérifier la CI du dernier HEAD; 2) réconcilier la copie anglaise avec la production; 3) valider éditorialement `docs/WEB_PARITY_AUDIT.md` avant de régler les drapeaux CD; 4) si l'hébergement est disponible, vérifier la racine/SSH, le marqueur, la sauvegarde et le SHA après déploiement; sinon avancer WEB-02 (base et formulaire) sans toucher aux bases TAKATAK.
+
+---
+
+ **Dépôt :** `takatakca/mimt`. **Branche :** `main`. Source de vérité : GitHub, consulter `git rev-parse HEAD` ou l'API de la branche **avant toute écriture**. Une tâche de reprise **horaire** avait été configurée, puis désactivée ultérieurement. Ne pas présumer d'une reprise automatique actuellement active. Ce fichier n'exécute rien à lui seul et la fréquence horaire n'est pas un traitement permanent.
 
 ## Dernière tâche terminée
 

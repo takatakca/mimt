@@ -120,3 +120,7 @@ L'API inclut `POST https://api.mimt.ca/v1/public/leads` et `supabase/migrations/
 Le build GitHub Actions utilise la variable publique `MIMT_WEB_FORMS_ENDPOINT`, qui peut être vide ou valoir exactement `https://api.mimt.ca/v1/public/leads`. Ne la configurer qu'après déploiement et vérification réelle de l'API et des migrations. Sans cela, le formulaire conserve son repli vers le courriel de contact.
 
 Avant d'activer la synchronisation du site, comparer les contenus du site live et ceux de GitHub : des pages existantes sont plus détaillées et `rsync --delete` risque de les remplacer.
+
+### Parité avant première publication
+
+Consulter `docs/WEB_PARITY_AUDIT.md`. En complément de `MIMT_WEB_DEPLOY_ENABLED=true`, définir `MIMT_WEB_PARITY_REVIEWED=true` **seulement après** revue du site live et de la version FR/EN en staging. Le marqueur distant doit contenir `mimt.ca`, et les mises à jour sauvegardent d'abord le site hors répertoire public sous `~/.mimt-web-backups/<SHA>/`. La synchronisation ne supprime plus automatiquement les fichiers distants.

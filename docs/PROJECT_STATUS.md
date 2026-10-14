@@ -34,3 +34,11 @@ Voir [TASK_QUEUE](TASK_QUEUE.md), [DEPLOYMENT](DEPLOYMENT.md), [AGENT_HANDOFF](A
 ## Orchestration
 
 Reprise externe programmée chaque heure le 2026-10-14, intitulée « MIMT — Reprise GitHub », pour relire la relève et poursuivre les tâches autorisées. Ce mécanisme ne prouve ni progression continue, ni réussite automatique d'une publication. Les garde-fous CI, base séparée et 9-1-1 restent obligatoires.
+
+## Audit de parité de cette session (2026-10-14)
+
+- Voir [WEB_PARITY_AUDIT.md](WEB_PARITY_AUDIT.md) : écarts observés entre le contenu vivant de `mimt.ca` et le dépôt `apps/web`.
+- Les contenus IA et comparateur ont été améliorés, mais aucune caractéristique commerciale encore non contractuelle (Claude/Anthropic, plafonds IA, durée précise) n'a été déclarée acquise dans GitHub.
+- Le déploiement Web exige maintenant `MIMT_WEB_DEPLOY_ENABLED=true` **et** `MIMT_WEB_PARITY_REVIEWED=true`, marqueur distant contenant `mimt.ca`, sauvegarde préalable hors répertoire public et synchronisation **sans suppression**.
+- Dernier succès CI confirmé lors de la modification : `100e29e7`. Les nouvelles CI doivent être revérifiées. **Aucun déploiement production exécuté** ; aucun accès SSH/Supabase MIMT confirmé.
+- L'automatisation horaire évoquée précédemment a été désactivée. La relève GitHub reste la source de continuité.

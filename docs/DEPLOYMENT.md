@@ -12,11 +12,11 @@
 
 ### Paramètres GitHub Actions nécessaires
 
-Variables : `MIMT_WEB_FORMS_ENDPOINT` (seulement après vérification de l'API), `MIMT_WEB_DEPLOY_ENABLED`, `MIMT_WEB_HOST`, `MIMT_WEB_PORT`, `MIMT_WEB_USER`, `MIMT_WEB_REMOTE_DIR`. Secrets : `MIMT_WEB_SSH_PRIVATE_KEY`, `MIMT_WEB_KNOWN_HOSTS`.
+Variables : `MIMT_WEB_FORMS_ENDPOINT` (seulement après vérification de l'API), `MIMT_WEB_DEPLOY_ENABLED`, `MIMT_WEB_PARITY_REVIEWED`, `MIMT_WEB_HOST`, `MIMT_WEB_PORT`, `MIMT_WEB_USER`, `MIMT_WEB_REMOTE_DIR`. Secrets : `MIMT_WEB_SSH_PRIVATE_KEY`, `MIMT_WEB_KNOWN_HOSTS`.
 
 1. Inspecter dans l'hébergement réel de `mimt.ca` le chemin exact de la racine documentaire et son contenu. Sauvegarder le site en place.
 2. Comparer les pages du site actif aux 28 routes GitHub (spécialement IA, comparateur, App Web) et préserver les fonctionnalités non encore réintégrées.
-3. Vérifier la clé publique SSH de l'hôte par un canal fiable, configurer secrets et variables GitHub; placer le fichier vide `.mimt-web-managed` dans **la bonne racine**.
+3. Vérifier la clé publique SSH de l'hôte par un canal fiable, configurer secrets et variables GitHub; placer le fichier `.mimt-web-managed` dont le contenu doit être **`mimt.ca`** dans **la bonne racine**.
 4. Configurer le service de formulaires seulement si l'API et sa DB sont validées; `NEXT_PUBLIC_FORMS_ENDPOINT` doit être une URL HTTPS publique, sans jeton. Sinon repli `mailto:`.
 5. Activer le drapeau une fois la cible vérifiée. Un push `main` déclenchera CI et, si vert, la publication de l'artéfact.
 6. Vérifier `https://mimt.ca/deploy-version.txt` == SHA de la CI; parcourir `/en/`, `/ia/`, `/comparer/`, `/app-web/` et les formulaires.
@@ -46,3 +46,9 @@ Paramètres : variable GitHub `MIMT_API_DEPLOY_ENABLED`; secrets `MIMT_COOLIFY_D
 Références : documentation officielle Coolify Deploy Webhooks et Get Deployment by UUID.
 
 **État des accès (2026-10-14) :** la connexion Supabase accessible ne contient pas de projet nommé MIMT. Il est interdit d'appliquer les migrations MIMT à TAKATAK STAGING ou à un projet d'un autre produit. Il faut d'abord créer/identifier le projet Supabase dédié à MIMT et vérifier qu'il appartient à la bonne organisation.
+
+### Sécurité de publication WEB-01
+
+Le drapeau `MIMT_WEB_PARITY_REVIEWED` ne peut passer à `true` qu'après revue de la parité du site public (voir [WEB_PARITY_AUDIT.md](WEB_PARITY_AUDIT.md)), y compris l'anglais, et confirmation des exclusions intentionnelles des promesses IA. Le marqueur `.mimt-web-managed` doit contenir **exactement** le texte `mimt.ca`; un fichier vide n'est plus accepté.
+
+Chaque déploiement conserve un snapshot distant sous `/home/<SSH USER>/.mimt-web-backups/<SHA>/`, puis copie l'artéfact avec `--backup` **sans `--delete`**. Les fichiers uniquement présents en production restent en place. L'absence d'espace disque suffisant ou un échec de sauvegarde doit faire échouer la publication, pas contourner le contrôle. Après déploiement, comparer le SHA réellement servi et surveiller les erreurs HTTP.

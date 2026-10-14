@@ -4,7 +4,7 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 
 | Priorité | ID | Tâche | Critère observable | Bloqué par |
 | --- | --- | --- | --- | --- |
-| P0 | WEB-01 | Réconcilier le site GitHub et le site public avant synchronisation destructrice | Pages, prix, mentions IA, titres/menus et actions comparés; différences approuvées; CI export sans régression | Aucun accès secret |
+| P0 | WEB-01 | Réconcilier site GitHub et production | **Audit FR effectué, code IA/comparateur enrichi, déploiement non destructif en place**; il reste parité anglaise + revue éditoriale/juridique des écarts avant approbation | Revue des pages EN, validation du propriétaire |
 | P0 | WEB-02 | Achever collecte de leads de bout en bout | Migration `0004` appliquée, endpoint `/v1/public/leads` opérationnel avec erreur et limitation, formulaire `NEXT_PUBLIC_FORMS_ENDPOINT` configuré; tests POST réels contrôlés | Nouveau projet Supabase MIMT absent de la connexion actuelle; API hébergée non confirmée |
 | P0 | WEB-03 | Vérifier hébergement mimt.ca et activer CD si approprié | Cible SSH vérifiée, fichier `.mimt-web-managed` placé, variables/secrets configurés, CI verte et `deploy-version.txt` = SHA publié | Accès au serveur et GitHub secrets |
 | P0 | TEL-00 | Automatiser API après CI avec Coolify | `deploy-api.yml` activé seulement sur ressource API de `main`, SHA et /readyz vérifiés | Accès Coolify et secrets GitHub |
@@ -32,3 +32,5 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 4. Valider les flux sûrs et préparer le contrôle de release sans requérir de secrets.
 
 **Ne jamais afficher « 100 % terminé » si les étapes de production et du 9-1-1 n'ont pas été vérifiées.**
+
+- 2026-10-14 : `WEB-01-PARTIAL` — audit différentiel FR dans `docs/WEB_PARITY_AUDIT.md`, correctifs contenus IA/comparateur et protection du déploiement. **Pas d'approbation de la parité live, pas de publication.**
