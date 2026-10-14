@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join, dirname } from "node:path";
+import { assertNoUnapprovedAiClaims } from "./check-claims.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "out");
 const routes = [
@@ -52,9 +53,7 @@ for (const [route, notice] of releaseNotices) {
 // enforcement before appearing on the not-yet-launched AI page.
 for (const route of ["ia", "en/ai"]) {
   const html = readFileSync(join(root, route, "index.html"), "utf8");
-  if (/Anthropic|Claude AI|AI monthly cap/i.test(html)) {
-    throw new Error("Unapproved provider or AI cap promise on " + route);
-  }
+  assertNoUnapprovedAiClaims(html, route);
 }
 console.log("MIMT release disclaimer and emergency-link checks passed.");
 console.log("MIMT static export validated: " + checked + " localized pages.");

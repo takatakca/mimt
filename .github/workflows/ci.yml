@@ -36,6 +36,8 @@ jobs:
         env:
           NEXT_PUBLIC_FORMS_ENDPOINT: ${{ vars.MIMT_WEB_FORMS_ENDPOINT }}
         run: pnpm --filter @mimt/web build
+      - name: Check AI commercial claim regression tests
+        run: node --test apps/web/scripts/check-claims.test.mjs
       - name: Check bilingual static export
         run: node apps/web/scripts/check-export.mjs
       - name: Check static link checker unit tests
