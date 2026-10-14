@@ -38,6 +38,10 @@ jobs:
         run: pnpm --filter @mimt/web build
       - name: Check bilingual static export
         run: node apps/web/scripts/check-export.mjs
+      - name: Check static link checker unit tests
+        run: node --test apps/web/scripts/check-links.test.mjs
+      - name: Check links and anchor targets on exported pages
+        run: node apps/web/scripts/check-links.mjs
       - name: Publish static website artifact
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
