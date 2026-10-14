@@ -18,6 +18,7 @@ jobs:
   deploy:
     if: >-
       ${{ vars.MIMT_WEB_DEPLOY_ENABLED == 'true' &&
+          vars.MIMT_WEB_PARITY_REVIEWED == 'true' &&
           github.event.workflow_run.conclusion == 'success' &&
           github.event.workflow_run.event == 'push' &&
           github.event.workflow_run.head_branch == 'main' &&
@@ -74,14 +75,22 @@ jobs:
           printf '%s\n' "$PRIVATE_KEY" > "$HOME/.ssh/id_deploy"
           printf '%s\n' "$KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/id_deploy" "$HOME/.ssh/known_hosts"
-      - name: Publish only to an explicitly marked MIMT directory
+      - name: Back up live content and publish without deletion
         shell: bash
         run: |
           set -euo pipefail
           SSH="ssh -i $HOME/.ssh/id_deploy -o BatchMode=yes -o StrictHostKeyChecking=yes -p ${PORT:-22}"
-          # The owner must have created the marker on the correct MIMT document root.
-          $SSH "$USER@$HOST" "test -f '$REMOTE_DIR/.mimt-web-managed'"
-          rsync -az --delete --filter='P .mimt-web-managed' --filter='P .htaccess' \
+          BACKUP_ROOT="/home/$USER/.mimt-web-backups"
+          MARKER="$($SSH "$USER@$HOST" "cat '$REMOTE_DIR/.mimt-web-managed'")"
+          test "$MARKER" = "mimt.ca" || {
+            echo "MIMT site marker must contain mimt.ca; refusing to overwrite."
+            exit 1
+          }
+          # Save the complete live document root outside public_html before any writes.
+          $SSH "$USER@$HOST" "umask 077; mkdir -p '$BACKUP_ROOT/$HEAD_SHA'; rsync -a '$REMOTE_DIR/' '$BACKUP_ROOT/$HEAD_SHA/'"
+          # Never --delete unknown live assets. Preserve .htaccess and ownership marker.
+          rsync -az --backup --backup-dir="$BACKUP_ROOT/$HEAD_SHA/overwritten" \
+            --exclude=.mimt-web-managed --exclude=.htaccess \
             -e "$SSH" site/ "$USER@$HOST:$REMOTE_DIR/"
       - name: Verify exact release at mimt.ca
         shell: bash
