@@ -13,6 +13,7 @@ import type {
   Message,
   OutboxEvent,
   PhoneNumber,
+  PublicLead,
   PushToken,
   RefreshToken,
   Repository,
@@ -57,6 +58,16 @@ export class PostgresRepository implements Repository {
   }
   async close() {
     await this.sql.end({ timeout: 5 });
+  }
+
+  async createPublicLead(input: Omit<PublicLead, "id" | "createdAt">) {
+    return one<PublicLead>(await this.sql`
+      insert into public_leads
+        (form_kind, locale, email, fields, marketing_opt_in_requested, marketing_text, source_path)
+      values (${input.formKind}, ${input.locale}, ${input.email},
+        ${this.sql.json(input.fields as postgres.JSONValue)}, ${input.marketingOptInRequested},
+        ${input.marketingText}, ${input.sourcePath})
+      returning *`);
   }
 
   // users

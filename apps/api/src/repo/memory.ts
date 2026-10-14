@@ -13,6 +13,7 @@ import type {
   Message,
   OutboxEvent,
   PhoneNumber,
+  PublicLead,
   PushToken,
   RefreshToken,
   Repository,
@@ -28,6 +29,7 @@ const ACTIVE_CALL_STATUSES = new Set(["queued", "initiated", "ringing", "in-prog
 
 /** In-memory repository for tests and for booting the API locally without a database. */
 export class MemoryRepository implements Repository {
+  publicLeads: PublicLead[] = [];
   users = new Map<string, User>();
   refreshTokens = new Map<string, RefreshToken>();
   accounts = new Map<string, TelecomAccount>();
@@ -53,6 +55,12 @@ export class MemoryRepository implements Repository {
 
   async ping() {}
   async close() {}
+
+  async createPublicLead(input: Omit<PublicLead, "id" | "createdAt">): Promise<PublicLead> {
+    const row: PublicLead = { ...input, id: randomUUID(), createdAt: new Date() };
+    this.publicLeads.push(row);
+    return clone(row);
+  }
 
   // users
   async createUser(u: Parameters<Repository["createUser"]>[0]) {

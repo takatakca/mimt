@@ -259,7 +259,22 @@ export interface AuditEntry {
 
 type New<T, Optional extends keyof T = never> = Omit<T, "id" | "createdAt" | Optional> & Partial<Pick<T, Optional>>;
 
+/** A public-site request, stored privately and never returned by an unauthenticated API. */
+export interface PublicLead {
+  id: string;
+  formKind: "waitlist" | "demo" | "contact";
+  locale: "fr-CA" | "en-CA";
+  email: string;
+  fields: Record<string, string>;
+  marketingOptInRequested: boolean;
+  marketingText: string;
+  sourcePath: string;
+  createdAt: Date;
+}
+
 export interface Repository {
+  /** Writes visitor interest privately; public callers never receive the stored row. */
+  createPublicLead(input: Omit<PublicLead, "id" | "createdAt">): Promise<PublicLead>;
   ping(): Promise<void>;
   close(): Promise<void>;
 

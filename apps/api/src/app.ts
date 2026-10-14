@@ -18,6 +18,7 @@ import { meRoutes } from "./routes/me.js";
 import { messageRoutes } from "./routes/messages.js";
 import { numberRoutes } from "./routes/numbers.js";
 import { pushRoutes } from "./routes/push.js";
+import { publicLeadRoutes } from "./routes/publicLeads.js";
 import { rewardRoutes } from "./routes/rewards.js";
 import { twilioWebhooks } from "./routes/twilioWebhooks.js";
 import { voiceRoutes } from "./routes/voice.js";
@@ -59,6 +60,7 @@ export async function buildApp(deps: AppDeps) {
 
   const routes: Routes[] = [
     healthRoutes,
+    publicLeadRoutes,
     authRoutes,
     deviceRoutes,
     handoffRoutes,
