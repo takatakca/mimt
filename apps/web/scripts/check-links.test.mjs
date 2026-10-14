@@ -50,3 +50,24 @@ test("rejects unsafe javascript links", () => {
     assert.match(result.errors.join(" "), /unsafe link protocol/);
   });
 });
+
+test("ignores data-href and only audits actual anchor href attributes", () => {
+  assert.deepEqual(extractAnchors('<a data-href="/not-a-link/">Preview</a><a data-href="/ignored/" href="/en/">English</a>'), ["/en/"]);
+  fixture({ "": '<a data-href="/missing/">Not a link</a><a href="/en/">English</a>', "en": "<h1>EN</h1>" }, (result) => {
+    assert.deepEqual(result.errors, []);
+    assert.equal(result.links, 1);
+  });
+});
+
+test("does not accept data-id as an anchor target", () => {
+  fixture({ "": '<a href="/en/#missing">Go</a>', "en": '<section data-id="missing">Not a fragment target</section>' }, (result) => {
+    assert.equal(result.errors.length, 1);
+    assert.match(result.errors[0], /missing #missing/);
+  });
+});
+
+test("accepts real id when a tag also has data-id", () => {
+  fixture({ "": '<a href="/en/#present">Go</a>', "en": '<section data-id="other" id="present">Valid fragment</section>' }, (result) => {
+    assert.deepEqual(result.errors, []);
+  });
+});

@@ -23,12 +23,12 @@ function* indexFiles(root, directory = root) {
 
 export function extractAnchors(html) {
   // Read only generated HTML, never user-supplied or unsanitized HTML.
-  return [...html.matchAll(/<a(?=\s|>)[^>]*\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)]
+  return [...html.matchAll(/<a(?=\s|>)[^>]*?\s+href\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)]
     .map((match) => decodeEntities(match[1] ?? match[2] ?? ""));
 }
 
 function elementIds(html) {
-  return new Set([...html.matchAll(/\bid\s*=\s*(?:"([^"]+)"|'([^']+)')/gi)]
+  return new Set([...html.matchAll(/<[a-z][^>]*?\s+id\s*=\s*(?:"([^"]+)"|'([^']+)')/gi)]
     .map((match) => decodeEntities(match[1] ?? match[2] ?? "")));
 }
 
