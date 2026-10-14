@@ -3,7 +3,7 @@
 **Votre numéro canadien, partout.** Appels, textos, messagerie vocale et téléphonie d'affaires par Internet (VoIP), au Québec et au Canada.
 Un membre de l'écosystème **GROUPE TAKATAK** ([takatak.ca](https://takatak.ca)).
 
-> Statut : **phase 1 en construction** (octobre 2026). Rien n'est en production. Voir `docs/MIMT-MVP.md`.
+> Statut : **site public mimt.ca accessible**, mais **services télécom en phase 1, non lancés** (octobre 2026). Le déploiement automatique du site nécessite encore la configuration de l'hébergement. Voir `docs/MIMT-MVP.md` et `apps/web/README.md`.
 
 ## Contenu du dépôt
 

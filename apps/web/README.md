@@ -84,3 +84,31 @@ No secrets: these values are public. The CASL marketing checkbox is optional, un
 ## Before launch
 
 Legal texts (9-1-1, complaints, privacy, terms) carry an HTML comment `à valider par l'avocat` and placeholders to fill (privacy officer, legal name, retention periods). Prices are proposals and are labelled as such.
+
+## Déploiement automatique GitHub → MIMT.CA (14 octobre 2026)
+
+La CI vérifie le typage et les tests, exporte les 28 pages FR/EN puis publie l'artéfact `mimt-web-static`.
+Le flux `.github/workflows/deploy-web.yml` déploie exactement cet artéfact après une CI réussie sur `main`.
+Il ne bâtit rien sur MochaHost. Le site est déjà accessible mais l'hébergeur réel et sa racine de document doivent être vérifiés avant toute synchronisation.
+
+### Paramètres GitHub Actions requis
+
+| Type | Nom | Signification |
+| --- | --- | --- |
+| Variable | `MIMT_WEB_DEPLOY_ENABLED` | `true` uniquement après validation du répertoire cible; autrement rien n'est publié |
+| Variable | `MIMT_WEB_HOST` | Hôte SSH du serveur Web qui héberge réellement mimt.ca |
+| Variable | `MIMT_WEB_PORT` | Port SSH, typiquement 22 |
+| Variable | `MIMT_WEB_USER` | Utilisateur SSH |
+| Variable | `MIMT_WEB_REMOTE_DIR` | Dossier public dédié à mimt.ca, chemin absolu sous /home/ |
+| Secret | `MIMT_WEB_SSH_PRIVATE_KEY` | Clé privée de déploiement dédiée |
+| Secret | `MIMT_WEB_KNOWN_HOSTS` | Empreinte vérifiée de l'hôte SSH, au format known_hosts |
+
+Avant d'activer, créer **manuellement** un fichier `.mimt-web-managed` dans le répertoire cible. Cette protection refuse les déploiements dans un dossier non identifié comme MIMT. Le workflow préserve ce fichier et le `.htaccess` existant, puis vérifie le hash réellement publié sur `https://mimt.ca/deploy-version.txt`.
+
+Ne jamais utiliser le dossier public d'un autre site ni activer le workflow si le répertoire contient des fichiers non-MIMT. N'envoyez pas les secrets dans le code ou dans un message.
+
+Le site GitHub couvre depuis le 14 octobre les anciennes pages manquantes `/ia/`, `/comparer/` et `/app-web/` (et leurs versions anglaises). La présence des pages sur GitHub ne confirme pas à elle seule un déploiement sur l'hébergement.
+
+### Avant mise en service commerciale
+
+Les prix sont des propositions; le fournisseur d'IA, les textes juridiques, le 9-1-1, les intégrations de téléphonie et les comptes d'hébergement restent à valider indépendamment. Les formulaires ont un repli courriel lorsque `NEXT_PUBLIC_FORMS_ENDPOINT` est vide.
