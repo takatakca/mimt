@@ -36,3 +36,9 @@ Pour rollback : restaurer l'archive hors public sauvegardée avant le transfert;
 ## Vérification anglaise complémentaire — 14 octobre 2026
 
 L'outil de consultation Web n'a pas récupéré les pages `https://mimt.ca/en/`, `/en/ai/`, `/en/compare/` et `/en/web-app/`; les tentatives ne prouvent pas leur absence réelle. **Ne pas marquer la parité anglaise comme vérifiée**. Côté dépôt, la CI `38625918929` a validé les liens internes et les fragments de l'export bilingue, pas le rendu public. Faire une comparaison visuelle FR/EN en staging et conserver la validation éditoriale/legal avant la bascule.
+
+## Revue anglaise textuelle du 14 octobre 2026
+
+Les pages publiques /en/, /en/ai/, /en/compare/ et /en/web-app/ ont pu être récupérées par navigation depuis l'accueil EN. Comparaison avec HomePage.tsx, AiPage.tsx, ComparePage.tsx et WebAppPage.tsx : l'accueil conserve les catégories et les avertissements de pré-lancement. La page IA live annonce Claude/Anthropic, des plafonds mensuels 2/10/25 CAD, cinq minutes de réceptionniste et un masquage des cartes; la source GitHub ne garantit pas ces points. Le comparateur live détaille les avis aux jours 20/27 et la quarantaine de 90 jours, contrairement à la source plus générale. La page Web live détaille le clavier, les textos, la messagerie et le portail, tandis que la source précise que l'accès public n'est pas lancé.
+
+**Statut :** comparaison textuelle EN documentée, mais parité visuelle/staging, validation commerciale, légale, 9-1-1 et SHA déployé non confirmés. Ne pas activer MIMT_WEB_PARITY_REVIEWED.
