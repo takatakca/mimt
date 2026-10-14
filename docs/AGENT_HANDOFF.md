@@ -2,7 +2,19 @@
 
 **Date du constat :** 2026-10-14.
 
-## Relève la plus récente — WEB-01, 14 octobre 2026
+## Confirmation CI et relève — 14 octobre 2026
+
+- **Dernier commit fonctionnel confirmé poussé :** `aaa8b62926722914359c7021d61e1ec09019bd22` (garde-fous bilingues de pré-lancement et références 9-1-1 dans `apps/web/scripts/check-export.mjs`).
+- **CI de ce commit :** réussie, run [38624276434](https://github.com/takatakca/mimt/actions/runs/38624276434) ; comprend installation, build partagé, typecheck, tests, build site, export et vérification de 28 routes.
+- **Dernier commit documentaire après confirmation CI :** lire le SHA actuel de `main` avant toute nouvelle écriture; ce document fait avancer la branche.
+- **Déploiements :** `Deploy MIMT Website` et `Deploy MIMT API` restent `skipped` ; **aucune publication du nouveau SHA vérifiée**.
+- **Blocage :** revue éditoriale/site EN et validation du chemin SSH, projet Supabase MIMT, secrets Coolify/Twilio, exigences réglementaires.
+- **Tâche actuelle exacte :** terminer l'audit parité anglais en environnement accessible et faire signer les différences documentées dans `docs/WEB_PARITY_AUDIT.md`; ensuite vérifier les prérequis WEB-02 et WEB-03 sans contourner les drapeaux ni les essais 9-1-1.
+- **Fichiers additionnels de cette session :** `apps/web/scripts/check-export.mjs`; six documents `docs/` et `WORKLOG.md` mis à jour. Commande CI ajoutée : `node apps/web/scripts/check-export.mjs` (exécutée avec succès dans GitHub Actions).
+
+---
+
+## Relève précédente — WEB-01, 14 octobre 2026
 
 - **Dernière tâche code terminée :** durcissement de `.github/workflows/deploy-web.yml` au commit `100e29e7a707024c3f9a80869958fd1677d78184`, parité IA au commit `53c71675de05e24b9f01b652f38d0e7b08396acf`, comparateur au commit `fda2694dacccb85a19a9fd24dcf0d0abf05522f3` et audit `docs/WEB_PARITY_AUDIT.md` au commit `756ada90bc8f0d6cb890b1ea504494d2878bb52a`. Le SHA HEAD continuera à évoluer lors de la mise à jour de cette relève : lire `main`.
 - **Tâche actuelle :** terminer la validation de parité du contenu du site public dans les deux langues et la vérification d'intégration des services. Ne pas remplacer silencieusement la version en ligne.

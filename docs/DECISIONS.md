@@ -18,6 +18,8 @@ Mise à jour : 2026-10-14. Distinguer décisions approuvées, orientations de co
 
 | D-12 | Une première publication du site exige une revue de parité explicite; aucune suppression de fichiers distants, sauvegarde pré-déploiement hors répertoire public, marqueur nommé `mimt.ca` | Eviter d'écraser un site existant plus complet | `.github/workflows/deploy-web.yml`, `docs/WEB_PARITY_AUDIT.md` |
 
+| D-13 | Conserver dans la CI des assertions d'avis pré-lancement bilingues et de références au 9-1-1 dans les pages clés | Éviter qu'une page statique présente un service non ouvert comme déjà commercialisé | `apps/web/scripts/check-export.mjs`, CI run `38624276434` |
+
 ## Décisions ou validations toujours ouvertes
 
 - Confirmation du fournisseur, des tarifs finaux et des contrats légaux, notamment l'IA et les échanges hors Québec.

@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-14 | GPT-6 (MIMT WEB-01) | main | done (live approval pending) | Audited published FR website against GitHub; reconciled AI/comparison copy, documented deliberate vendor/cost exclusions; hardened SSH backup-first non-destructive deploy, CI green at 100e29e | Next: verify later CI runs; obtain owner parity review, host/SSH credentials and real API/database before release
+- 2026-10-14 | GPT-6 (MIMT WEB-01) | main | done (live approval pending) | Audited live French website vs source; reconciled AI/compare; added backup-first no-delete SSH release guard and 28-route bilingual launch/9-1-1 export regression checks; CI success at aaa8b629 | Next: audit live English pages, validate editorial/legal differences, verify hosting and secure CD approvals, then API/DB rollout
 
 - 2026-10-14 | codex (MIMT orchestration) | hourly external schedule | done | Configured authorized hourly GitHub resumption using the five handoff documents, guarded deploy and real CI evidence | On next invocation: check current HEAD and CI, continue the highest unblocked TASK_QUEUE item; report actions
 - 2026-10-14 | codex (MIMT hardening) | main | done (production blocked) | Added public form collector with tests and RLS migration, five handoff docs, Coolify API deploy workflow and site forms build variable; CI verified through d4b168d | Owner: create dedicated Supabase MIMT project, deploy API, verify mimt.ca hosting and SSH, configure GitHub vars/secrets, validate telecom/legal

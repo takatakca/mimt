@@ -42,3 +42,9 @@ Reprise externe programmée chaque heure le 2026-10-14, intitulée « MIMT — R
 - Le déploiement Web exige maintenant `MIMT_WEB_DEPLOY_ENABLED=true` **et** `MIMT_WEB_PARITY_REVIEWED=true`, marqueur distant contenant `mimt.ca`, sauvegarde préalable hors répertoire public et synchronisation **sans suppression**.
 - Dernier succès CI confirmé lors de la modification : `100e29e7`. Les nouvelles CI doivent être revérifiées. **Aucun déploiement production exécuté** ; aucun accès SSH/Supabase MIMT confirmé.
 - L'automatisation horaire évoquée précédemment a été désactivée. La relève GitHub reste la source de continuité.
+
+## Dernière vérification CI — 14 octobre 2026
+
+- Commit fonctionnel `aaa8b62926722914359c7021d61e1ec09019bd22` : **CI réussie** ([run 38624276434](https://github.com/takatakca/mimt/actions/runs/38624276434)); vérification TypeScript, suite de tests et export Next.js, y compris messages de pré-lancement et liens 9-1-1 sur les routes bilingues critiques.
+- Aucun secret d'API, fournisseur IA, prix IA plafonné ou contrat d'hébergement n'a été ajouté dans ce travail. Les fonctionnalités IA ne sont pas déclarées lancées.
+- **Statut production inchangé :** workflow site et API `skipped`; `mimt.ca/deploy-version.txt` ne confirme pas le SHA et `api.mimt.ca` reste non vérifié. Le projet demeure en construction.

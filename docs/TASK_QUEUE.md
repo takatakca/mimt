@@ -34,3 +34,5 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 **Ne jamais afficher « 100 % terminé » si les étapes de production et du 9-1-1 n'ont pas été vérifiées.**
 
 - 2026-10-14 : `WEB-01-PARTIAL` — audit différentiel FR dans `docs/WEB_PARITY_AUDIT.md`, correctifs contenus IA/comparateur et protection du déploiement. **Pas d'approbation de la parité live, pas de publication.**
+
+- 2026-10-14 : `WEB-04-PARTIAL` — CI de l'export renforcée : pages FR/EN critiques, mention de pré-lancement et liens 9-1-1. Vérification réussie au SHA `aaa8b629`; tests E2E, appareil réel et validation du site en production restent à réaliser.

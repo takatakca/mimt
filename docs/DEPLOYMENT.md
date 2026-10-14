@@ -52,3 +52,7 @@ Références : documentation officielle Coolify Deploy Webhooks et Get Deploymen
 Le drapeau `MIMT_WEB_PARITY_REVIEWED` ne peut passer à `true` qu'après revue de la parité du site public (voir [WEB_PARITY_AUDIT.md](WEB_PARITY_AUDIT.md)), y compris l'anglais, et confirmation des exclusions intentionnelles des promesses IA. Le marqueur `.mimt-web-managed` doit contenir **exactement** le texte `mimt.ca`; un fichier vide n'est plus accepté.
 
 Chaque déploiement conserve un snapshot distant sous `/home/<SSH USER>/.mimt-web-backups/<SHA>/`, puis copie l'artéfact avec `--backup` **sans `--delete`**. Les fichiers uniquement présents en production restent en place. L'absence d'espace disque suffisant ou un échec de sauvegarde doit faire échouer la publication, pas contourner le contrôle. Après déploiement, comparer le SHA réellement servi et surveiller les erreurs HTTP.
+
+### Vérification CI avant publication (WEB-01)
+
+Le script `node apps/web/scripts/check-export.mjs` valide toutes les 28 routes statiques et leurs alternances de langue, le sitemap, la page 404, les éléments exportés et les avis de pré-lancement et 9-1-1 des pages publiques critiques. Il a réussi dans GitHub Actions au SHA `aaa8b629` (run 38624276434). **Cela ne valide pas une installation de téléphonie réelle ni un déploiement live.**
