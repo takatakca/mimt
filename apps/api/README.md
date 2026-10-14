@@ -141,3 +141,9 @@ TEST_DATABASE_URL=postgres://localhost/mimt_test pnpm --filter @mimt/api test
 - Usage periods are UTC calendar months; align with the billing period when paid plans start.
 - Redis rate limiter and a separate outbox worker when scaling past one instance.
 - Run `pnpm --filter @mimt/api job:twilio-guardrails` once the Twilio API key is in the environment (Canada/US voice permissions, daily spend trigger). It does not buy numbers.
+
+## Formulaires publics MIMT
+
+`POST /v1/public/leads` accepte `waitlist`, `demo` et `contact` avec `Origin: https://mimt.ca`, applique validation de formulaire, limitation d'abus et enregistre la demande dans `public_leads`. Aucun identifiant ou donnée privée ne figure dans la réponse `202 {"accepted":true}`.
+
+Appliquer `0004_public_leads.sql` sur la base séparée MIMT, vérifier la RLS, l'API HTTPS et le CORS, puis configurer `MIMT_WEB_FORMS_ENDPOINT` dans les variables GitHub Actions du site. Ne pas diffuser de marketing avant confirmation de l'adresse et du consentement. Tests : `apps/api/test/public-leads.test.ts`. Aucun déploiement public n'est confirmé ici.

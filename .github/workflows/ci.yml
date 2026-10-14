@@ -22,7 +22,20 @@ jobs:
       - run: pnpm --filter @mimt/shared build
       - run: pnpm typecheck
       - run: pnpm test
-      - run: pnpm --filter @mimt/web build
+      - name: Verify configured public forms endpoint
+        shell: bash
+        env:
+          NEXT_PUBLIC_FORMS_ENDPOINT: ${{ vars.MIMT_WEB_FORMS_ENDPOINT }}
+        run: |
+          set -euo pipefail
+          if [ -n "$NEXT_PUBLIC_FORMS_ENDPOINT" ] && [ "$NEXT_PUBLIC_FORMS_ENDPOINT" != "https://api.mimt.ca/v1/public/leads" ]; then
+            echo "Invalid public form endpoint; refusing to build with a foreign destination."
+            exit 1
+          fi
+      - name: Build public site
+        env:
+          NEXT_PUBLIC_FORMS_ENDPOINT: ${{ vars.MIMT_WEB_FORMS_ENDPOINT }}
+        run: pnpm --filter @mimt/web build
       - name: Check bilingual static export
         run: node apps/web/scripts/check-export.mjs
       - name: Publish static website artifact

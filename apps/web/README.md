@@ -112,3 +112,11 @@ Le site GitHub couvre depuis le 14 octobre les anciennes pages manquantes `/ia/`
 ### Avant mise en service commerciale
 
 Les prix sont des propositions; le fournisseur d'IA, les textes juridiques, le 9-1-1, les intégrations de téléphonie et les comptes d'hébergement restent à valider indépendamment. Les formulaires ont un repli courriel lorsque `NEXT_PUBLIC_FORMS_ENDPOINT` est vide.
+
+## Collecte persistante des formulaires (en cours d'intégration)
+
+L'API inclut `POST https://api.mimt.ca/v1/public/leads` et `supabase/migrations/0004_public_leads.sql`. Elle valide les champs FR/EN, refuse les origines étrangères et limite les envois. La réponse est `202 {"accepted":true}` après écriture dans une table privée. La demande de consentement marketing ne devient jamais un abonnement actif sans vérification du courriel.
+
+Le build GitHub Actions utilise la variable publique `MIMT_WEB_FORMS_ENDPOINT`, qui peut être vide ou valoir exactement `https://api.mimt.ca/v1/public/leads`. Ne la configurer qu'après déploiement et vérification réelle de l'API et des migrations. Sans cela, le formulaire conserve son repli vers le courriel de contact.
+
+Avant d'activer la synchronisation du site, comparer les contenus du site live et ceux de GitHub : des pages existantes sont plus détaillées et `rsync --delete` risque de les remplacer.

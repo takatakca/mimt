@@ -1,6 +1,6 @@
 # MIMT: architecture and MVP plan
 
-Prepared: 2026-10-09 by the MIMT agent (agent 2). Status: **plan only. No code, no repository, no purchases yet.**
+Prepared: 2026-10-09 by the MIMT agent (agent 2). **Historique :** ce document était initialement un plan. Au 2026-10-14, le dépôt `takatakca/mimt` et le code existent, mais le lancement télécom et l'hébergement API ne sont pas vérifiés. Voir `docs/PROJECT_STATUS.md` pour l'état actuel.
 Companion docs: [MIMT.md](MIMT.md) (scope), [MIMT-REGULATORY.md](MIMT-REGULATORY.md) (rules), [MIMT-STACK.md](MIMT-STACK.md) (costs).
 
 Scope reminder (from `MIMT.md`): TAKATAK owns identity, Business Registry, workspaces, verification and activation. MIMT owns telecom accounts, numbers, voice, SMS/MMS, voicemail, telecom billing and every Twilio-facing operation. This plan does not touch the TAKATAK V1 AI panel, Social or homepage.

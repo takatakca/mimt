@@ -7,6 +7,7 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 | P0 | WEB-01 | Réconcilier le site GitHub et le site public avant synchronisation destructrice | Pages, prix, mentions IA, titres/menus et actions comparés; différences approuvées; CI export sans régression | Aucun accès secret |
 | P0 | WEB-02 | Achever collecte de leads de bout en bout | Migration `0004` appliquée, endpoint `/v1/public/leads` opérationnel avec erreur et limitation, formulaire `NEXT_PUBLIC_FORMS_ENDPOINT` configuré; tests POST réels contrôlés | Projet DB et API hébergée |
 | P0 | WEB-03 | Vérifier hébergement mimt.ca et activer CD si approprié | Cible SSH vérifiée, fichier `.mimt-web-managed` placé, variables/secrets configurés, CI verte et `deploy-version.txt` = SHA publié | Accès au serveur et GitHub secrets |
+| P0 | TEL-00 | Automatiser API après CI avec Coolify | `deploy-api.yml` activé seulement sur ressource API de `main`, SHA et /readyz vérifiés | Accès Coolify et secrets GitHub |
 | P0 | TEL-01 | Environnement API et base MIMT | Coolify/API HTTPS, sauvegardes, migrations 0001–0004, `/readyz` réel DB up | Accès Coolify + Supabase séparé |
 | P0 | TEL-02 | Valider téléphonie et obligations | Sous-compte Twilio payant, numéros/adresses 9-1-1, geo permissions CA/US, essais 933 chez opérateur, revue CRTC/CCTS/conditions | Fournisseur + responsable juridique |
 | P0 | SECURITY-01 | Vérifier absence de secrets et RLS en environnement réel | Contrôle RLS, tests anonymes refusés, pas de clés service navigateur, logs sans PII, audit auth | Projet Supabase |

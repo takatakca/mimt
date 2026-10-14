@@ -12,7 +12,7 @@
 
 ### Paramètres GitHub Actions nécessaires
 
-Variables : `MIMT_WEB_DEPLOY_ENABLED`, `MIMT_WEB_HOST`, `MIMT_WEB_PORT`, `MIMT_WEB_USER`, `MIMT_WEB_REMOTE_DIR`. Secrets : `MIMT_WEB_SSH_PRIVATE_KEY`, `MIMT_WEB_KNOWN_HOSTS`.
+Variables : `MIMT_WEB_FORMS_ENDPOINT` (seulement après vérification de l'API), `MIMT_WEB_DEPLOY_ENABLED`, `MIMT_WEB_HOST`, `MIMT_WEB_PORT`, `MIMT_WEB_USER`, `MIMT_WEB_REMOTE_DIR`. Secrets : `MIMT_WEB_SSH_PRIVATE_KEY`, `MIMT_WEB_KNOWN_HOSTS`.
 
 1. Inspecter dans l'hébergement réel de `mimt.ca` le chemin exact de la racine documentaire et son contenu. Sauvegarder le site en place.
 2. Comparer les pages du site actif aux 28 routes GitHub (spécialement IA, comparateur, App Web) et préserver les fonctionnalités non encore réintégrées.
@@ -36,3 +36,11 @@ Variables : `MIMT_WEB_DEPLOY_ENABLED`, `MIMT_WEB_HOST`, `MIMT_WEB_PORT`, `MIMT_W
 ## C. Gate production
 
 Lancement interdit sans : backup/restore, CI verte, migrations validées, tests auth et consentement, monitoring, revue juridique de l'avis 9-1-1, validation chez transporteur, preuve du SHA servi et procédure d'incident. Les tests avancés peuvent suivre, jamais les contrôles de sécurité critiques.
+
+## D. Déploiement automatisé de l'API (désactivé par défaut)
+
+Le workflow `.github/workflows/deploy-api.yml` déclenche un **déploiement Coolify de la seule ressource API MIMT** après une CI verte sur `main`, puis attend le statut de fin, vérifie le commit déployé et interroge `https://api.mimt.ca/readyz` (base, Twilio, Stripe). Il reste ignoré tant que `MIMT_API_DEPLOY_ENABLED` n'est pas `true`.
+
+Paramètres : variable GitHub `MIMT_API_DEPLOY_ENABLED`; secrets `MIMT_COOLIFY_DEPLOY_WEBHOOK` (URL exacte de la ressource MIMT) et `MIMT_COOLIFY_DEPLOY_TOKEN` (jeton limité à la permission `deploy`). Ne configurer qu'après avoir créé l'application Coolify pour `main`, avec `apps/api/Dockerfile` et le port interne `8080`, les migrations et les secrets API. Un déclenchement du webhook n'est jamais considéré comme une publication réussie sans contrôle de révision et de santé.
+
+Références : documentation officielle Coolify Deploy Webhooks et Get Deployment by UUID.
