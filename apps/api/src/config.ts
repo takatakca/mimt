@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isIP } from "node:net";
 import { isSipHost } from "./lib/cuba.js";
 
 const optional = z.string().min(1).optional();
@@ -7,6 +8,18 @@ const csv = (fallback: string[]) =>
     .string()
     .optional()
     .transform((v) => (v ? v.split(",").map((s) => s.trim()).filter(Boolean) : fallback));
+
+/** Only explicit gateway addresses/CIDRs may supply client IP forwarding headers. */
+function isTrustedProxyCidr(value: string): boolean {
+  const [ip, prefix, ...rest] = value.split("/");
+  if (rest.length) return false;
+  const family = isIP(ip ?? "");
+  if (!family) return false;
+  if (prefix === undefined) return true;
+  if (!/^[0-9]{1,3}$/.test(prefix)) return false;
+  const bits = Number(prefix);
+  return family === 4 ? bits >= 8 && bits <= 32 : bits >= 32 && bits <= 128;
+}
 
 const EnvSchema = z
   .object({
@@ -17,6 +30,7 @@ const EnvSchema = z
     PUBLIC_BASE_URL: z.url().default("http://localhost:8080"),
     APP_BASE_URL: z.url().default("https://app.mimt.ca"),
     CORS_ORIGINS: csv(["https://mimt.ca", "https://app.mimt.ca", "https://takatak.ca"]),
+    TRUSTED_PROXY_CIDRS: csv([]),
     DATABASE_URL: optional,
 
     TWILIO_ACCOUNT_SID: optional,
@@ -77,6 +91,9 @@ const EnvSchema = z
       .transform((v) => v === "true"),
   })
   .superRefine((env, ctx) => {
+    for (const cidr of env.TRUSTED_PROXY_CIDRS) {
+      if (!isTrustedProxyCidr(cidr)) ctx.addIssue({ code: "custom", path: ["TRUSTED_PROXY_CIDRS"], message: "Use explicit IP/CIDR (IPv4 /8-/32, IPv6 /32-/128), never trust all proxies" });
+    }
     if (env.SENTRY_DSN && !env.SENTRY_DSN.startsWith("https://")) {
       ctx.addIssue({ code: "custom", path: ["SENTRY_DSN"], message: "SENTRY_DSN must be https" });
     }

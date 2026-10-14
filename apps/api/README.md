@@ -30,6 +30,7 @@ Sans configuration, l'API démarre quand même : stockage en mémoire (sans `DAT
 | `PUBLIC_BASE_URL` | https | URL publique (`https://api.mimt.ca`). Sert à valider `X-Twilio-Signature` et à construire les URL de webhooks |
 | `APP_BASE_URL` | | Retour après paiement Stripe (défaut `https://app.mimt.ca`) |
 | `CORS_ORIGINS` | | Liste séparée par virgules (défaut `mimt.ca`, `app.mimt.ca`, `takatak.ca`) |
+| `TRUSTED_PROXY_CIDRS` | | Adresses IP/réseaux du **proxy inverse immédiatement devant l'API**, séparés par virgules. Vide = ignorer les en-têtes `X-Forwarded-For` (défaut sûr). Vérifier dans l'hébergement avant configuration. Jamais `0.0.0.0/0` ou `::/0`. |
 | `DATABASE_URL` | oui | Postgres Supabase (connexion directe / service role) |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_API_KEY_SID`, `TWILIO_API_KEY_SECRET` | oui | Appels REST Twilio (clé API, pas le jeton maître) |
 | `TWILIO_AUTH_TOKEN` | oui | **Uniquement** pour valider les signatures des webhooks |

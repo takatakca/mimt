@@ -29,7 +29,8 @@ type Routes = (app: import("fastify").FastifyInstance, deps: AppDeps) => Promise
 export async function buildApp(deps: AppDeps) {
   const app = Fastify({
     logger: loggerOptions(deps.config),
-    trustProxy: true,
+    // Trust only the known reverse proxy; otherwise forged X-Forwarded-For can bypass IP throttling.
+    trustProxy: deps.config.TRUSTED_PROXY_CIDRS.length ? deps.config.TRUSTED_PROXY_CIDRS : false,
     bodyLimit: 256 * 1024,
   });
 

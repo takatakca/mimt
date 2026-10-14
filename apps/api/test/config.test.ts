@@ -10,10 +10,19 @@ describe("config", () => {
     expect(c.PORT).toBe(8080);
     expect(c.TWILIO_ACCOUNT_SID).toBeUndefined();
     expect(c.CORS_ORIGINS).toEqual(["https://mimt.ca", "https://app.mimt.ca", "https://takatak.ca"]);
+    expect(c.TRUSTED_PROXY_CIDRS).toEqual([]);
   });
 
   it("treats empty strings as unset", () => {
     expect(loadConfig({ TWILIO_ACCOUNT_SID: "" }).TWILIO_ACCOUNT_SID).toBeUndefined();
+  });
+
+  it("allows only explicit trusted proxy IPs or reasonably scoped CIDRs", () => {
+    expect(loadConfig({ TRUSTED_PROXY_CIDRS: "127.0.0.1,172.16.0.0/12,::1/128" }).TRUSTED_PROXY_CIDRS)
+      .toEqual(["127.0.0.1", "172.16.0.0/12", "::1/128"]);
+    for (const unsafe of ["0.0.0.0/0", "::/0", "not-a-network", "0.0.0.0/1", "203.0.113.1/33", "http://proxy"]) {
+      expect(() => loadConfig({ TRUSTED_PROXY_CIDRS: unsafe })).toThrow(/TRUSTED_PROXY_CIDRS/);
+    }
   });
 
   it("requires Twilio, Stripe, keys and the database in production", () => {
