@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-14 | GPT-6 (SECURITY-03) | agent/security-rate-limiter-20261014 | code committed, local checks passed; CI pending | Bounded in-memory fraud limiter and tests, no changes to active WEB-02 | Obtain authorized full CI; do not deploy or scale API replicas yet
+
 - 2026-10-14 | GPT-6 (MIMT WEB-02 consent integrity) | main | active | Align canonical FR/EN marketing consent copy across website/API, reject tampered opt-in evidence, add regression tests; no production deployment | Finish guarded change, run CI, update five handoff docs
 
 - 2026-10-14 | GPT-6 (MIMT SECURITY) | main | done (prod config pending) | Replaced Fastify trustProxy=true with explicit CIDR allowlist, validated CIDR config, added client IP regression tests; CI 38626239265 success at 319e8794 | Owner: confirm reverse proxy IP/CIDR before API deployment; no telecom deployment verified
