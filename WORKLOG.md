@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-14 | GPT-6 (MIMT SECURITY) | main | active | Restrict Fastify trusted proxies to explicit verified CIDRs; prevent X-Forwarded-For spoof of per-IP rate limits | Add tests, CI, docs
+
 - 2026-10-14 | GPT-6 (MIMT WEB-04) | main | active | Add CI link/fragment integrity checking for all 28 static routes with test cases; audit launch gates | Verify CI, update docs and handoff; no deployment without verified hosting
 
 - 2026-10-14 | GPT-6 (MIMT WEB-01) | main | done (live approval pending) | Audited live French website vs source; reconciled AI/compare; added backup-first no-delete SSH release guard and 28-route bilingual launch/9-1-1 export regression checks; CI success at aaa8b629 | Next: audit live English pages, validate editorial/legal differences, verify hosting and secure CD approvals, then API/DB rollout
