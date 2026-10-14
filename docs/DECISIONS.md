@@ -31,3 +31,9 @@ Mise à jour : 2026-10-14. Distinguer décisions approuvées, orientations de co
 **Vérification 2026-10-14 :** aucun projet MIMT n'apparaît dans les cinq projets de la connexion Supabase accessible. On ne réutilise **pas** TAKATAK STAGING comme base télécom MIMT.
 
 **Réserve IA (WEB-01) :** la production publiée mentionne « Claude/Anthropic » et des limites monétaires IA qui ne sont pas vérifiées comme intégrées, contractées ou appliquées par l'API. La copie GitHub présente ces capacités comme prévues; ne pas engager contractuellement des fournisseurs ou des montants à partir du seul texte live.
+
+## Décisions techniques — validation sécurité/qualité du 14 octobre 2026
+
+- **D-14 / Proxys :** ne faire confiance à `X-Forwarded-For` que lorsque l'adresse IP immédiate est dans `TRUSTED_PROXY_CIDRS`. Aucun proxy fiable par défaut; ne pas autoriser tous les réseaux. Justification : empêcher les clients non fiables de contourner les limites IP en forgeant des en-têtes. Code `apps/api/src/app.ts`, `config.ts`; CI `38626239265` réussie.
+- **D-15 / Liens :** refuser la publication d'un export Web comprenant des liens internes manquants ou des ancres invalides; vérifier les deux langues. Code `apps/web/scripts/check-links.mjs`; CI `38625918929` réussie.
+- **Décision ouverte :** sélectionner les IP du proxy réel et une limitation de requêtes centralisée avant l'usage multi-instance. Ne jamais confondre contrôle de qualité du site statique et essai télécom réel.

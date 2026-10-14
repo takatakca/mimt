@@ -48,3 +48,12 @@ Reprise externe programmée chaque heure le 2026-10-14, intitulée « MIMT — R
 - Commit fonctionnel `aaa8b62926722914359c7021d61e1ec09019bd22` : **CI réussie** ([run 38624276434](https://github.com/takatakca/mimt/actions/runs/38624276434)); vérification TypeScript, suite de tests et export Next.js, y compris messages de pré-lancement et liens 9-1-1 sur les routes bilingues critiques.
 - Aucun secret d'API, fournisseur IA, prix IA plafonné ou contrat d'hébergement n'a été ajouté dans ce travail. Les fonctionnalités IA ne sont pas déclarées lancées.
 - **Statut production inchangé :** workflow site et API `skipped`; `mimt.ca/deploy-version.txt` ne confirme pas le SHA et `api.mimt.ca` reste non vérifié. Le projet demeure en construction.
+
+## Reprise supplémentaire — 14 octobre 2026
+
+**Dernier commit technique testé :** `319e8794d715222213be3476eb57b75490c365ad`, [CI réussie 38626239265](https://github.com/takatakca/mimt/actions/runs/38626239265). `main` sera avancée par cette mise à jour documentaire : vérifier son SHA actuel dans GitHub à la prochaine reprise.
+
+- Site statique : audit systématique des liens internes et fragments sur toutes les pages exportées; tests du vérificateur dans GitHub Actions, [CI réussie 38625918929](https://github.com/takatakca/mimt/actions/runs/38625918929).
+- API : suppression de `trustProxy: true`; les en-têtes IP transmis par un proxy sont ignorés par défaut et acceptés seulement depuis les CIDR explicitement autorisés, avec contrôles de configuration et tests.
+- Déploiement : `Deploy MIMT Website` et `Deploy MIMT API` ont tous deux été **skipped** pour `319e8794` ; aucun SHA en production ne peut être confirmé. Les secrets du vrai hébergeur, Coolify et la base MIMT restent non vérifiés.
+- Parité EN : tentative d'ouverture de `/en/`, `/en/ai/`, `/en/compare/`, `/en/web-app/` via l'accès web; pages non récupérées, **pas de déclaration de parité live**. L'export EN GitHub passe les contrôles internes, ce qui n'est pas un contrôle live.

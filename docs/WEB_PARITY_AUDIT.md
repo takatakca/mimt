@@ -32,3 +32,7 @@ Pour rollback : restaurer l'archive hors public sauvegardée avant le transfert;
 - Site public le 2026-10-14 : https://mimt.ca/ , https://mimt.ca/ia/ , https://mimt.ca/comparer/ , https://mimt.ca/app-web/
 - Code : `apps/web/components/pages/HomePage.tsx`, `AiPage.tsx`, `ComparePage.tsx`, `WebAppPage.tsx`, `packages/shared/src/plans.ts`.
 - CI GitHub : succès du commit `100e29e7` (durcissement du déploiement); vérifier les runs ultérieurs dans GitHub Actions.
+
+## Vérification anglaise complémentaire — 14 octobre 2026
+
+L'outil de consultation Web n'a pas récupéré les pages `https://mimt.ca/en/`, `/en/ai/`, `/en/compare/` et `/en/web-app/`; les tentatives ne prouvent pas leur absence réelle. **Ne pas marquer la parité anglaise comme vérifiée**. Côté dépôt, la CI `38625918929` a validé les liens internes et les fragments de l'export bilingue, pas le rendu public. Faire une comparaison visuelle FR/EN en staging et conserver la validation éditoriale/legal avant la bascule.

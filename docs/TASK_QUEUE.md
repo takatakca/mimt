@@ -36,3 +36,11 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 - 2026-10-14 : `WEB-01-PARTIAL` — audit différentiel FR dans `docs/WEB_PARITY_AUDIT.md`, correctifs contenus IA/comparateur et protection du déploiement. **Pas d'approbation de la parité live, pas de publication.**
 
 - 2026-10-14 : `WEB-04-PARTIAL` — CI de l'export renforcée : pages FR/EN critiques, mention de pré-lancement et liens 9-1-1. Vérification réussie au SHA `aaa8b629`; tests E2E, appareil réel et validation du site en production restent à réaliser.
+
+## Actualisation CI/sécurité — 14 octobre 2026
+
+- **WEB-04 : vérification des liens internes et sections, réalisée côté dépôt** : `apps/web/scripts/check-links.mjs`, `check-links.test.mjs` exécutés dans CI `38625918929` (succès). Ne remplace pas des tests E2E clavier/appareils.
+- **SECURITY-02 : confiance des proxys corrigée dans le code** : `TRUSTED_PROXY_CIDRS` validé, trustProxy désactivé par défaut; CI `38626239265` verte. Pour la mise en production, déterminer et configurer uniquement l'adresse du proxy Coolify effectif.
+- **SECURITY-03 : à faire** : vérifier la limitation d'abus en environnement multi-instance; le jeton-bucket mémoire n'est pas distribué entre réplicas. Ne pas faire tourner plusieurs réplicas télécom sans limite centralisée.
+- **WEB-01 : partiellement bloqué** : pages EN en ligne non récupérées par l'outil de consultation; obtenir une validation par navigateur de staging et revoir les engagements IA/commerciaux.
+- Les déploiements Web et API sont restés **skipped**. Priorité de suite : intégrations vérifiées et parité avant activation des flags.

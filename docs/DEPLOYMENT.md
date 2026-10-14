@@ -56,3 +56,10 @@ Chaque déploiement conserve un snapshot distant sous `/home/<SSH USER>/.mimt-we
 ### Vérification CI avant publication (WEB-01)
 
 Le script `node apps/web/scripts/check-export.mjs` valide toutes les 28 routes statiques et leurs alternances de langue, le sitemap, la page 404, les éléments exportés et les avis de pré-lancement et 9-1-1 des pages publiques critiques. Il a réussi dans GitHub Actions au SHA `aaa8b629` (run 38624276434). **Cela ne valide pas une installation de téléphonie réelle ni un déploiement live.**
+
+## Contrôles ajoutés à cette reprise
+
+- Le pipeline CI vérifie désormais les liens internes et les ancres de toutes les pages HTML via `node apps/web/scripts/check-links.mjs` après l'export (avec tests isolés : `node --test apps/web/scripts/check-links.test.mjs`). Preuve : GitHub Actions `38625918929`, succès.
+- **Reverse proxy API :** `TRUSTED_PROXY_CIDRS` est vide par défaut : `X-Forwarded-For` n'est pas pris en compte comme adresse client. Après avoir identifié l'IP réelle du proxy immédiatement devant l'API, configurer **uniquement** son IP/CIDR dans le coffre-fort Coolify. Le programme refuse les entrées non valides et les CIDR tous réseaux `0.0.0.0/0`, `::/0`; ne pas deviner un réseau Docker partagé. Test CI `38626239265`, succès.
+- Les limites de requêtes par IP ne sont pas distribuées entre plusieurs instances Fastify; prévoir un magasin central ou maintenir une seule instance surveillée. Les routes Twilio/Stripe requièrent toujours la vérification de signature.
+- Les workflows Web et API du dernier commit technique `319e8794` sont ignorés (`skipped`). Cette modification ne constitue ni lancement commercial, ni validation de routage du 9-1-1.

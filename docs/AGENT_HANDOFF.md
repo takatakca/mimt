@@ -1,5 +1,20 @@
 # MIMT — Relève automatique d'agent
 
+## Relève vérifiée — 14 octobre 2026 (sécurité API et qualité Web)
+
+- **Dépôt/branche :** `takatakca/mimt`, `main`. **Dernier commit technique poussé et testé :** `319e8794d715222213be3476eb57b75490c365ad` ; cette relève documentaire produit un nouveau SHA HEAD à lire dans GitHub.
+- **Dernière tâche terminée :** audit de liens et sections de 28 pages statiques avec quatre tests Node; restriction de l'IP client transmise par le proxy aux CIDR explicites.
+- **Tâche en cours / suivante :** terminer `WEB-01` (parité Web anglaise réellement publiée); puis `WEB-02` (base Supabase MIMT indépendante, API de formulaires), sans toucher à TAKATAK.
+- **Fichiers modifiés :** `WORKLOG.md`, `apps/web/scripts/check-links.mjs`, `apps/web/scripts/check-links.test.mjs`, `.github/workflows/ci.yml`, `apps/api/src/config.ts`, `apps/api/src/app.ts`, `apps/api/test/config.test.ts`, `apps/api/test/proxy-trust.test.ts`, `apps/api/.env.example`, `apps/api/README.md` et cinq documents `docs/`.
+- **Vérifications réellement exécutées :** inspection GitHub HEAD/PR/issues (aucun ouvert), `AGENTS.md`, `WORKLOG.md`, docs, workflows; `pnpm typecheck`, `pnpm test`, `pnpm --filter @mimt/web build`, `node apps/web/scripts/check-export.mjs`, `node --test apps/web/scripts/check-links.test.mjs`, `node apps/web/scripts/check-links.mjs` **par GitHub Actions**. Runs verts : [38625918929](https://github.com/takatakca/mimt/actions/runs/38625918929) au SHA `501839f9` et [38626239265](https://github.com/takatakca/mimt/actions/runs/38626239265) au SHA `319e8794`.
+- **Déploiements réels :** `Deploy MIMT Website` et `Deploy MIMT API` sur `319e8794` sont **skipped**, pas de preuve de publication. Aucun appel 9-1-1 réel, aucune migration appliquée, aucun déploiement opérateur.
+- **Erreurs/blocages :** le site EN en ligne n'a pas pu être récupéré; ancien texte public IA à valider; les accès SSH/marqueur, la racine mimt.ca, le projet Supabase MIMT et la ressource Coolify/Twilio ne sont pas établis. Le rate limiter d'API est en mémoire par instance.
+- **Accès manquants :** variables GitHub CD Web et Coolify configurées sur les bonnes ressources; CIDR réel du reverse-proxy; projet DB MIMT Canada et migrations; Twilio, Stripe et validation juridique/CRTC. Ne pas exposer les secrets dans le dépôt ou chat.
+- **Action exacte à la reprise :** vérifier HEAD `main` et sa CI, auditer `mimt.ca/en/`, `/en/ai/`, `/en/compare/`, `/en/web-app/` contre export GitHub en staging; si accès live impossible, avancer tests `SECURITY-03`. Ne régler les drapeaux de déploiement qu'avec validation d'hébergement, sauvegarde et preuve SHA.
+
+---
+
+
 **Date du constat :** 2026-10-14.
 
 ## Confirmation CI et relève — 14 octobre 2026
