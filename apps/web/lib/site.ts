@@ -11,6 +11,9 @@ export const ROUTES = {
   home: { fr: "/", en: "/en/" },
   plans: { fr: "/forfaits/", en: "/en/plans/" },
   business: { fr: "/affaires/", en: "/en/business/" },
+  ai: { fr: "/ia/", en: "/en/ai/" },
+  compare: { fr: "/comparer/", en: "/en/compare/" },
+  webapp: { fr: "/app-web/", en: "/en/web-app/" },
   soon: { fr: "/bientot/", en: "/en/coming-soon/" },
   e911: { fr: "/9-1-1/", en: "/en/9-1-1/" },
   help: { fr: "/aide/", en: "/en/help/" },
@@ -31,6 +34,9 @@ export const LABELS: Record<RouteKey, { fr: string; en: string }> = {
   home: { fr: "Accueil", en: "Home" },
   plans: { fr: "Forfaits", en: "Plans" },
   business: { fr: "Affaires", en: "Business" },
+  ai: { fr: "IA", en: "AI" },
+  compare: { fr: "Comparer", en: "Compare" },
+  webapp: { fr: "App Web", en: "Web app" },
   soon: { fr: "Bientôt", en: "Coming soon" },
   e911: { fr: "9-1-1", en: "9-1-1" },
   help: { fr: "Aide", en: "Help" },
@@ -41,7 +47,7 @@ export const LABELS: Record<RouteKey, { fr: string; en: string }> = {
   contact: { fr: "Contact", en: "Contact" },
 };
 
-export const MAIN_NAV: RouteKey[] = ["plans", "business", "soon", "help", "contact"];
+export const MAIN_NAV: RouteKey[] = ["plans", "business", "ai", "soon", "help", "contact"];
 
 /** Per-page metadata with canonical, hreflang (fr-CA / en-CA) and Open Graph. */
 export function pageMeta(lang: Lang, key: RouteKey, title: string, description: string): Metadata {

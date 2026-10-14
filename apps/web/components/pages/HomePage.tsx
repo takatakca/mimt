@@ -118,6 +118,27 @@ export function HomePage({ lang }: { lang: Lang }) {
         </div>
       </section>
 
+      <section className="section" aria-labelledby="ai-home">
+        <div className="container">
+          <p className="kicker">{fr ? "Intelligence artificielle" : "Artificial intelligence"}</p>
+          <h2 id="ai-home">{fr ? "Une IA utile, jamais sans votre accord" : "Helpful AI, only with your permission"}</h2>
+          <p className="section-lead">{fr ? "Résumés vocaux, réponses suggérées et réceptionniste virtuelle : des fonctions en préparation, facultatives et désactivées par défaut." : "Voicemail summaries, suggested replies and virtual reception: planned features that are optional and off by default."}</p>
+          <div className="cta-row">
+            <a className="btn btn--outline" href={href(lang, "ai")}>{fr ? "Découvrir l'IA" : "Explore AI"}</a>
+            <a className="btn btn--outline" href={href(lang, "compare")}>{fr ? "Comparer MIMT" : "Compare MIMT"}</a>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section--tint" aria-labelledby="webapp-home">
+        <div className="container">
+          <p className="kicker">{fr ? "Application Web" : "Web app"}</p>
+          <h2 id="webapp-home">{fr ? "Votre numéro aussi sur l'ordinateur" : "Your number, also on your computer"}</h2>
+          <p className="section-lead">{fr ? "Appels, textos et outils d'affaires dans votre navigateur. Lancement à venir." : "Calls, texts and business tools in your browser. Launch to come."}</p>
+          <a className="btn btn--outline" href={href(lang, "webapp")}>{fr ? "Découvrir l'App Web" : "Explore the Web app"}</a>
+        </div>
+      </section>
+
       <section className="section quebec" aria-labelledby="qc-title">
         <div className="container quebec__inner">
           <h2 id="qc-title">{fr ? "Fait au Québec · écosystème GROUPE TAKATAK" : "Made in Québec · GROUPE TAKATAK ecosystem"}</h2>
