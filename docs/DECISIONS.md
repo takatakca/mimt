@@ -16,6 +16,8 @@ Mise à jour : 2026-10-14. Distinguer décisions approuvées, orientations de co
 | D-10 | Fonctions IA encore en projet et soumis à consentement, pas de fournisseur garanti par le seul code du site | Les textes live et les implémentations ne sont pas intégralement synchronisés | `apps/web/components/pages/AiPage.tsx` |
 | D-11 | Tarifs présentés comme propositions, pas comme offres en vigueur | Marché et coûts transporteur à valider | `packages/shared/src/plans.ts`, `docs/MIMT-MVP.md` |
 
+| D-12 | Une première publication du site exige une revue de parité explicite; aucune suppression de fichiers distants, sauvegarde pré-déploiement hors répertoire public, marqueur nommé `mimt.ca` | Eviter d'écraser un site existant plus complet | `.github/workflows/deploy-web.yml`, `docs/WEB_PARITY_AUDIT.md` |
+
 ## Décisions ou validations toujours ouvertes
 
 - Confirmation du fournisseur, des tarifs finaux et des contrats légaux, notamment l'IA et les échanges hors Québec.
@@ -25,7 +27,5 @@ Mise à jour : 2026-10-14. Distinguer décisions approuvées, orientations de co
 - Validation du canal d'envoi (courriel, API) et du processus de double confirmation marketing avant toute campagne.
 
 **Vérification 2026-10-14 :** aucun projet MIMT n'apparaît dans les cinq projets de la connexion Supabase accessible. On ne réutilise **pas** TAKATAK STAGING comme base télécom MIMT.
-
-| D-12 | Une première publication du site exige une revue de parité explicite; aucune suppression de fichiers distants, sauvegarde pré-déploiement hors répertoire public, marqueur nommé `mimt.ca` | Eviter d'écraser un site existant plus complet | `.github/workflows/deploy-web.yml`, `docs/WEB_PARITY_AUDIT.md` |
 
 **Réserve IA (WEB-01) :** la production publiée mentionne « Claude/Anthropic » et des limites monétaires IA qui ne sont pas vérifiées comme intégrées, contractées ou appliquées par l'API. La copie GitHub présente ces capacités comme prévues; ne pas engager contractuellement des fournisseurs ou des montants à partir du seul texte live.
