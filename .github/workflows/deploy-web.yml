@@ -1,0 +1,95 @@
+name: Deploy MIMT Website
+
+# Reuse the static artifact built and checked by CI on main.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: mimt-web-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      ${{ vars.MIMT_WEB_DEPLOY_ENABLED == 'true' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    environment: mimt-web-production
+    env:
+      HOST: ${{ vars.MIMT_WEB_HOST }}
+      PORT: ${{ vars.MIMT_WEB_PORT }}
+      USER: ${{ vars.MIMT_WEB_USER }}
+      REMOTE_DIR: ${{ vars.MIMT_WEB_REMOTE_DIR }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Refuse superseded builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          CURRENT_HEAD="$(git ls-remote https://github.com/takatakca/mimt.git refs/heads/main | cut -f1)"
+          test -n "$CURRENT_HEAD"
+          if [ "$CURRENT_HEAD" != "$HEAD_SHA" ]; then
+            echo "A newer main commit exists; stale deployment refused."
+            exit 1
+          fi
+      - uses: actions/download-artifact@v4
+        with:
+          name: mimt-web-static
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: site
+      - name: Validate target and install pinned host key
+        shell: bash
+        env:
+          PRIVATE_KEY: ${{ secrets.MIMT_WEB_SSH_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.MIMT_WEB_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$PRIVATE_KEY" && test -n "$KNOWN_HOSTS"
+          [[ "$HOST" =~ ^[A-Za-z0-9.-]+$ ]]
+          [[ "$USER" =~ ^[A-Za-z0-9_-]+$ ]]
+          [[ "${PORT:-22}" =~ ^[0-9]{1,5}$ ]]
+          [[ "$REMOTE_DIR" =~ ^/home/[A-Za-z0-9_-]+/[A-Za-z0-9_./-]+$ ]]
+          [[ "$REMOTE_DIR" != *".."* ]]
+          test -s site/index.html
+          test -s site/en/index.html
+          test -s site/ia/index.html
+          test -s site/comparer/index.html
+          test -s site/app-web/index.html
+          printf '%s\n' "$HEAD_SHA" > site/deploy-version.txt
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$PRIVATE_KEY" > "$HOME/.ssh/id_deploy"
+          printf '%s\n' "$KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_deploy" "$HOME/.ssh/known_hosts"
+      - name: Publish only to an explicitly marked MIMT directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          SSH="ssh -i $HOME/.ssh/id_deploy -o BatchMode=yes -o StrictHostKeyChecking=yes -p ${PORT:-22}"
+          # The owner must have created the marker on the correct MIMT document root.
+          $SSH "$USER@$HOST" "test -f '$REMOTE_DIR/.mimt-web-managed'"
+          rsync -az --delete --filter='P .mimt-web-managed' --filter='P .htaccess' \
+            -e "$SSH" site/ "$USER@$HOST:$REMOTE_DIR/"
+      - name: Verify exact release at mimt.ca
+        shell: bash
+        run: |
+          set -euo pipefail
+          for url in https://mimt.ca/ https://mimt.ca/en/ https://mimt.ca/ia/ https://mimt.ca/app-web/; do
+            curl --fail --silent --show-error --location --max-time 30 "$url" >/dev/null
+          done
+          RELEASED="$(curl --fail --silent --show-error --location --max-time 30 https://mimt.ca/deploy-version.txt)"
+          test "$RELEASED" = "$HEAD_SHA"
+          echo "MIMT website deployment verified at $HEAD_SHA."
