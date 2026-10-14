@@ -1,10 +1,11 @@
 import { PageHero, Shell } from "@/components/Shell";
+import { PLANS, formatCad } from "@/lib/plans-view";
 import { href, type Lang } from "@/lib/site";
 
 const features = [
-  { fr: ["Résumés vocaux", "Résumés courts de vos messages avec consentement."], en: ["Voicemail summaries", "Brief message summaries with your consent."] },
-  { fr: ["Réponses suggérées", "Des propositions pour vos textos, jamais envoyées automatiquement."], en: ["Suggested replies", "Text reply suggestions that are never sent automatically."] },
-  { fr: ["Appels suspects", "Des signaux de risque sans bloquer les rappels d'urgence."], en: ["Suspicious calls", "Risk signals without blocking emergency callbacks."] },
+  { fr: ["Résumés vocaux", "Un résumé du message, uniquement après votre consentement; le message original reste disponible."], en: ["Voicemail summaries", "Message summaries only after your consent; the original voicemail remains available."] },
+  { fr: ["Réponses suggérées", "De courtes propositions pour vos textos; aucune réponse n’est envoyée sans votre action."], en: ["Suggested replies", "Short text reply suggestions that are never sent without your action."] },
+  { fr: ["Appels suspects", "Des signaux de risque sans bloquer les rappels d'urgence."], en: ["Suspicious calls", "Risk signals without blocking emergency calls or callbacks."] },
   { fr: ["Réceptionniste IA", "Un accueil bilingue qui annonce clairement son caractère automatisé."], en: ["AI receptionist", "A bilingual greeting that clearly discloses automation."] },
 ];
 
@@ -28,7 +29,19 @@ export function AiPage({ lang }: { lang: Lang }) {
         <li>{fr ? "Un agent IA s'identifiera aux appelants." : "An AI agent will identify itself to callers."}</li>
       </ul>
       <p><a href={href(lang, "privacy")}>{fr ? "Politique de confidentialité" : "Privacy policy"}</a></p>
-      <p><a href={href(lang, "plans")}>{fr ? "Forfaits et limites" : "Plans and limits"}</a></p>
+      <h2>{fr ? "Forfaits envisagés" : "Plans under consideration"}</h2>
+      <p>{fr ? "Les fonctionnalités IA demeurent en préparation. Aucun plafond de consommation ni fournisseur d’IA n’est contractuellement confirmé. Les prix proposés ci-dessous sont avant taxes." : "AI features remain in development. No usage limit or AI provider is contractually confirmed. Proposed prices below exclude taxes."}</p>
+      <ul>
+        {(["premium", "business", "business_pro"] as const).map((code) => (
+          <li key={code}>
+            <strong>{PLANS[code].name[lang]}</strong>{" — "}
+            {formatCad(PLANS[code].monthlyPriceCents, lang)}
+            {PLANS[code].perLine ? (fr ? "/ligne/mois" : "/line/month") : (fr ? "/mois" : "/month")}
+          </li>
+        ))}
+      </ul>
+      <p>{fr ? "Les forfaits Gratuit et Verrouillage ne promettent aucune IA générative." : "Free and Number Lock plans do not promise generative AI."}</p>
+      <p><a href={href(lang, "plans")}>{fr ? "Voir tous les forfaits et leurs limites" : "See every plan and its limits"}</a></p>
     </div></section>
   </Shell>;
 }
