@@ -1,0 +1,93 @@
+name: Deploy MIMT API
+
+# Coolify is triggered only after a successful main-branch CI, and only when configured.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mimt-api-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      ${{ vars.MIMT_API_DEPLOY_ENABLED == 'true' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: mimt-api-production
+    env:
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      COOLIFY_DEPLOY_WEBHOOK: ${{ secrets.MIMT_COOLIFY_DEPLOY_WEBHOOK }}
+      COOLIFY_DEPLOY_TOKEN: ${{ secrets.MIMT_COOLIFY_DEPLOY_TOKEN }}
+    steps:
+      - name: Validate configuration and current branch head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$COOLIFY_DEPLOY_WEBHOOK"
+          test -n "$COOLIFY_DEPLOY_TOKEN"
+          [[ "$COOLIFY_DEPLOY_WEBHOOK" =~ ^https://[^/]+/api/v1/deploy\?uuid=[A-Za-z0-9_-]+.*$ ]]
+          CURRENT_SHA="$(git ls-remote https://github.com/takatakca/mimt.git refs/heads/main | cut -f1)"
+          test "$CURRENT_SHA" = "$RELEASE_SHA" || {
+            echo "Superseded build; the MIMT API deployment is not started."
+            exit 1
+          }
+      - name: Trigger exactly the configured MIMT API resource
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESPONSE="$(curl --fail --silent --show-error --max-time 30 \
+            --request POST "$COOLIFY_DEPLOY_WEBHOOK" \
+            --header "Authorization: Bearer $COOLIFY_DEPLOY_TOKEN")"
+          UUID="$(printf '%s' "$RESPONSE" | jq -r '.deployments[0].deployment_uuid // empty')"
+          [[ "$UUID" =~ ^[A-Za-z0-9_-]+$ ]] || {
+            echo "Coolify did not return a deployment identifier."
+            exit 1
+          }
+          echo "DEPLOYMENT_UUID=$UUID" >> "$GITHUB_ENV"
+          echo "DEPLOYMENTS_ENDPOINT=${COOLIFY_DEPLOY_WEBHOOK%%/api/v1/deploy*}/api/v1/deployments/$UUID" >> "$GITHUB_ENV"
+      - name: Check Coolify deployment completed at the intended SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          completed=false
+          for attempt in $(seq 1 48); do
+            BODY="$(curl --fail --silent --show-error --retry 2 --max-time 20 \
+              --header "Authorization: Bearer $COOLIFY_DEPLOY_TOKEN" \
+              "$DEPLOYMENTS_ENDPOINT")"
+            STATUS="$(printf '%s' "$BODY" | jq -r '.status // "unknown"')"
+            case "$STATUS" in
+              finished|success|successful)
+                ACTUAL_SHA="$(printf '%s' "$BODY" | jq -r '.commit // empty')"
+                # An accepted webhook is NOT a deployment proof: verify the built Git commit.
+                if [ "$ACTUAL_SHA" != "$RELEASE_SHA" ]; then
+                  echo "Coolify completed a different or unidentifiable revision."
+                  exit 1
+                fi
+                completed=true
+                break
+                ;;
+              failed*|cancelled*|canceled*|error*)
+                echo "Coolify deployment failed or was cancelled: $STATUS"
+                exit 1
+                ;;
+            esac
+            sleep 10
+          done
+          test "$completed" = true || { echo "Coolify did not complete before timeout."; exit 1; }
+      - name: Verify live MIMT API readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS="$(curl --fail --silent --show-error --location --retry 3 --max-time 30 https://api.mimt.ca/readyz)"
+          printf '%s' "$STATUS" | jq -e '.ok == true and .db == "up" and .twilio == true and .stripe == true' >/dev/null
+          echo "Live MIMT API readiness verified for $RELEASE_SHA."
