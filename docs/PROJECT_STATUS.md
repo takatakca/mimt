@@ -41,7 +41,7 @@ Reprise externe programmée chaque heure le 2026-10-14, intitulée « MIMT — R
 - Les contenus IA et comparateur ont été améliorés, mais aucune caractéristique commerciale encore non contractuelle (Claude/Anthropic, plafonds IA, durée précise) n'a été déclarée acquise dans GitHub.
 - Le déploiement Web exige maintenant `MIMT_WEB_DEPLOY_ENABLED=true` **et** `MIMT_WEB_PARITY_REVIEWED=true`, marqueur distant contenant `mimt.ca`, sauvegarde préalable hors répertoire public et synchronisation **sans suppression**.
 - Dernier succès CI confirmé lors de la modification : `100e29e7`. Les nouvelles CI doivent être revérifiées. **Aucun déploiement production exécuté** ; aucun accès SSH/Supabase MIMT confirmé.
-- L'automatisation horaire évoquée précédemment a été désactivée. La relève GitHub reste la source de continuité.
+- L'automatisation horaire « MIMT — Reprise GitHub » a été réactivée le 14 octobre 2026 avec obligation de relire les fichiers de relève, vérifier les protections et ne notifier qu'un changement réel. La relève GitHub reste la source de continuité.
 
 ## Dernière vérification CI — 14 octobre 2026
 

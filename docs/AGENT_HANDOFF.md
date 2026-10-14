@@ -26,7 +26,7 @@
 
 ---
 
- **Dépôt :** `takatakca/mimt`. **Branche :** `main`. Source de vérité : GitHub, consulter `git rev-parse HEAD` ou l'API de la branche **avant toute écriture**. Une tâche de reprise **horaire** avait été configurée, puis désactivée ultérieurement. Ne pas présumer d'une reprise automatique actuellement active. Ce fichier n'exécute rien à lui seul et la fréquence horaire n'est pas un traitement permanent.
+ **Dépôt :** `takatakca/mimt`. **Branche :** `main`. Source de vérité : GitHub, consulter `git rev-parse HEAD` ou l'API de la branche **avant toute écriture**. La tâche horaire **« MIMT — Reprise GitHub »** a été **réactivée** le 14 octobre 2026, après reprise confirmée des écritures GitHub. Elle effectue au plus une passe par heure selon les autorisations; elle ne constitue pas un processus permanent et ne prouve aucun déploiement. Ce fichier n'exécute rien à lui seul et la fréquence horaire n'est pas un traitement permanent.
 
 ## Dernière tâche terminée
 
