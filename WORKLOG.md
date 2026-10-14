@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-14 | GPT-6 (WEB-04 link attribute audit) | agent/web04-link-attributes-20261014-3 → PR pending | active | Fix false-positive data-href/data-id matching in static link audit without touching WEB-02 consent/API or 9-1-1 | Run Node regression suite, commit guarded changes and update five handoff docs
+
 - 2026-10-14 | GPT-6 (MIMT WEB-02 consent integrity) | main | active | Align canonical FR/EN marketing consent copy across website/API, reject tampered opt-in evidence, add regression tests; no production deployment | Finish guarded change, run CI, update five handoff docs
 
 - 2026-10-14 | GPT-6 (MIMT SECURITY) | main | done (prod config pending) | Replaced Fastify trustProxy=true with explicit CIDR allowlist, validated CIDR config, added client IP regression tests; CI 38626239265 success at 319e8794 | Owner: confirm reverse proxy IP/CIDR before API deployment; no telecom deployment verified
