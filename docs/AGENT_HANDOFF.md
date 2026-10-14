@@ -1,5 +1,12 @@
 # MIMT — Relève automatique d'agent
 
+## WEB-04 — reprise du 14 octobre 2026 (branche isolée)
+
+- Base vérifiée : `main` `c95f1cde0e2253cfbedff13e0bd953039ffd663c`, CI [38632496153](https://github.com/takatakca/mimt/actions/runs/38632496153) réussie; CD Web et API ignorés (`skipped`). Aucun PR/issue ouvert au début de la reprise.
+- Branche de travail : `agent/web04-link-attributes-20261014-3`; corrige les faux positifs `data-href`/`data-id` du vérificateur HTML, avec trois tests de régression. Tests locaux Node : **7/7**; `node --check` : réussi. **CI complète de la branche à vérifier**, aucune preuve de publication.
+- Concurrence : `WEB-02` consentement actif dans `WORKLOG.md`; branches `agent/security-rate-limiter-20261014` et `agent/web-ai-claims-20261014` laissées intactes. Aucun changement API, DB, Twilio, 9-1-1 ou aux drapeaux de déploiement.
+- Suite : ouvrir une PR vers `main`, lire sa CI et ses logs, corriger avant fusion; parité visuelle EN/staging et formulaire/API avec base MIMT dédiée toujours non validés. Ne pas activer `MIMT_WEB_PARITY_REVIEWED`.
+
 ## Relève vérifiée — 14 octobre 2026 (sécurité API et qualité Web)
 
 - **Dépôt/branche :** `takatakca/mimt`, `main`. **Dernier commit technique poussé et testé :** `319e8794d715222213be3476eb57b75490c365ad` ; cette relève documentaire produit un nouveau SHA HEAD à lire dans GitHub.

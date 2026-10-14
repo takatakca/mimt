@@ -63,3 +63,7 @@ Le script `node apps/web/scripts/check-export.mjs` valide toutes les 28 routes s
 - **Reverse proxy API :** `TRUSTED_PROXY_CIDRS` est vide par défaut : `X-Forwarded-For` n'est pas pris en compte comme adresse client. Après avoir identifié l'IP réelle du proxy immédiatement devant l'API, configurer **uniquement** son IP/CIDR dans le coffre-fort Coolify. Le programme refuse les entrées non valides et les CIDR tous réseaux `0.0.0.0/0`, `::/0`; ne pas deviner un réseau Docker partagé. Test CI `38626239265`, succès.
 - Les limites de requêtes par IP ne sont pas distribuées entre plusieurs instances Fastify; prévoir un magasin central ou maintenir une seule instance surveillée. Les routes Twilio/Stripe requièrent toujours la vérification de signature.
 - Les workflows Web et API du dernier commit technique `319e8794` sont ignorés (`skipped`). Cette modification ne constitue ni lancement commercial, ni validation de routage du 9-1-1.
+
+## WEB-04 — vérificateur de liens (2026-10-14)
+
+Le validateur HTML doit distinguer les vrais attributs `href` et `id` de `data-href` et `data-id`. Trois tests supplémentaires passent localement (7/7), **sans preuve de CI complète ou de publication**. `main` `c95f1cde` : [CI 38632496153](https://github.com/takatakca/mimt/actions/runs/38632496153) réussie; CD Web et API `skipped`. Maintenir les drapeaux, secrets, serveur, sauvegardes, SHA servi, base MIMT indépendante et obligations 9-1-1 comme prérequis absolus.

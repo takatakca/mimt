@@ -42,3 +42,7 @@ L'outil de consultation Web n'a pas récupéré les pages `https://mimt.ca/en/`,
 Les pages publiques /en/, /en/ai/, /en/compare/ et /en/web-app/ ont pu être récupérées par navigation depuis l'accueil EN. Comparaison avec HomePage.tsx, AiPage.tsx, ComparePage.tsx et WebAppPage.tsx : l'accueil conserve les catégories et les avertissements de pré-lancement. La page IA live annonce Claude/Anthropic, des plafonds mensuels 2/10/25 CAD, cinq minutes de réceptionniste et un masquage des cartes; la source GitHub ne garantit pas ces points. Le comparateur live détaille les avis aux jours 20/27 et la quarantaine de 90 jours, contrairement à la source plus générale. La page Web live détaille le clavier, les textos, la messagerie et le portail, tandis que la source précise que l'accès public n'est pas lancé.
 
 **Statut :** comparaison textuelle EN documentée, mais parité visuelle/staging, validation commerciale, légale, 9-1-1 et SHA déployé non confirmés. Ne pas activer MIMT_WEB_PARITY_REVIEWED.
+
+## Contrôle HTML EN/FR — 14 octobre 2026
+
+Sur la branche `agent/web04-link-attributes-20261014-3`, le contrôle de liens ignore désormais `data-href` comme lien et `data-id` comme ancre. Trois nouveaux tests, suite Node locale 7/7. Cela ne prouve pas la parité visuelle EN en production. Revue éditoriale, juridique et validation des fonctions requises avant tout déploiement.

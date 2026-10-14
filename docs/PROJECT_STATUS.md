@@ -57,3 +57,7 @@ Reprise externe programmée chaque heure le 2026-10-14, intitulée « MIMT — R
 - API : suppression de `trustProxy: true`; les en-têtes IP transmis par un proxy sont ignorés par défaut et acceptés seulement depuis les CIDR explicitement autorisés, avec contrôles de configuration et tests.
 - Déploiement : `Deploy MIMT Website` et `Deploy MIMT API` ont tous deux été **skipped** pour `319e8794` ; aucun SHA en production ne peut être confirmé. Les secrets du vrai hébergeur, Coolify et la base MIMT restent non vérifiés.
 - Parité EN : tentative d'ouverture de `/en/`, `/en/ai/`, `/en/compare/`, `/en/web-app/` via l'accès web; pages non récupérées, **pas de déclaration de parité live**. L'export EN GitHub passe les contrôles internes, ce qui n'est pas un contrôle live.
+
+## WEB-04 — attributs HTML (branche isolée, 2026-10-14)
+
+Correctif proposé : `data-href` n'est pas un lien, `data-id` n'est pas une cible de fragment. Trois nouveaux tests, suite Node locale **7/7**; CI complète de branche en attente. Base `main` `c95f1cde`, [CI 38632496153](https://github.com/takatakca/mimt/actions/runs/38632496153) réussie; CD Web/API `skipped`. Aucun nouveau déploiement ni migration; parité visuelle EN et formulaire/API avec base MIMT séparée toujours ouverts.

@@ -44,3 +44,5 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 - **SECURITY-03 : à faire** : vérifier la limitation d'abus en environnement multi-instance; le jeton-bucket mémoire n'est pas distribué entre réplicas. Ne pas faire tourner plusieurs réplicas télécom sans limite centralisée.
 - **WEB-01 : partiellement bloqué** : pages EN en ligne non récupérées par l'outil de consultation; obtenir une validation par navigateur de staging et revoir les engagements IA/commerciaux.
 - Les déploiements Web et API sont restés **skipped**. Priorité de suite : intégrations vérifiées et parité avant activation des flags.
+
+- 2026-10-14 — `WEB-04-LINK-ATTRS` (branche isolée) : correctif des faux positifs `data-href` et `data-id`; trois tests de régression, suite Node locale 7/7. **CI complète de PR à vérifier** avant intégration. Ne pas toucher au consentement WEB-02 actif. Parité visuelle EN et projet/API MIMT restent bloqués par validations et accès.
