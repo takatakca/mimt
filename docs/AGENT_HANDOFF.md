@@ -1,12 +1,12 @@
 # MIMT — Relève automatique d'agent
 
-**Date du constat :** 2026-10-14. **Dépôt :** `takatakca/mimt`. **Branche :** `main`. Source de vérité : GitHub, consulter `git rev-parse HEAD` ou l'API de la branche **avant toute écriture**. Aucune session en arrière-plan n'est déclenchée par ce fichier.
+**Date du constat :** 2026-10-14. **Dépôt :** `takatakca/mimt`. **Branche :** `main`. Source de vérité : GitHub, consulter `git rev-parse HEAD` ou l'API de la branche **avant toute écriture**. Une tâche de reprise **horaire** (« MIMT — Reprise GitHub ») a été configurée via l'orchestrateur de tâches le 2026-10-14. Ce fichier n'exécute rien à lui seul et la fréquence horaire n'est pas un traitement permanent.
 
 ## Dernière tâche terminée
 
 - Ajout code du collecteur privé des formulaires site : `POST /v1/public/leads`, validation, limite d'abus, repos mémoire/Postgres, tests, migration `0004_public_leads.sql`.
 - **Dernier commit de code et documentation technique poussé :** `91b95e4b5acaa502991b1f42999492f248e52b84`. Les commits de relève ultérieurs font avancer `main`; relire la branche pour le SHA de tête.
-- CI confirmées vertes : `629c4c7`, `fda368c`, `d4b168d`. CI sur `91b95e4` à consulter dans GitHub Actions (en file d'attente lors de cette mise à jour).
+- CI confirmées vertes : `629c4c7`, `fda368c`, `d4b168d`, `91b95e4`. CI du commit de relève `d703251` en attente lors de cette mise à jour. Les workflows API/Web CD sont `skipped`.
 
 ## Tâche en cours
 

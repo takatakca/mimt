@@ -30,3 +30,7 @@ Un commit dans GitHub n'est **pas** une preuve de déploiement. Les états « co
 Pour passer à « prêt », confirmer **ensemble** : CI verte sur le SHA livré, migrations effectivement appliquées, services intégrés opérationnels, revue juridique, preuve du domaine et du hash publié, vérifications 9-1-1/opérateur, secrets gérés hors code, suivi d'incidents et procédure de retour arrière.
 
 Voir [TASK_QUEUE](TASK_QUEUE.md), [DEPLOYMENT](DEPLOYMENT.md), [AGENT_HANDOFF](AGENT_HANDOFF.md) et [DECISIONS](DECISIONS.md).
+
+## Orchestration
+
+Reprise externe programmée chaque heure le 2026-10-14, intitulée « MIMT — Reprise GitHub », pour relire la relève et poursuivre les tâches autorisées. Ce mécanisme ne prouve ni progression continue, ni réussite automatique d'une publication. Les garde-fous CI, base séparée et 9-1-1 restent obligatoires.
