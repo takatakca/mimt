@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { PostgresRateLimiter, pruneExpiredRateBuckets } from "../src/fraud/postgresRateLimiter.js";
+import { PostgresRepository } from "../src/repo/postgres.js";
 
 const url = process.env.MIMT_RATE_LIMIT_TEST_DATABASE_URL;
 const migration = new URL("../../../supabase/migrations/20261015173000_shared_rate_limit_buckets.sql", import.meta.url);
@@ -68,6 +69,32 @@ describe.skipIf(!url)("shared PostgreSQL rate limit (isolated CI database)", () 
     expect(await pruneExpiredRateBuckets(first)).toBeGreaterThanOrEqual(1);
     expect((await first`select key_hash from public.fraud_rate_buckets where key_hash = ${oldHash}`)).toHaveLength(0);
     expect(await limiter.take(active, rule)).toBe(false);
+  });
+
+  it("rejects an incomplete or RLS-unprotected database at /readyz storage check", async () => {
+    const repo = new PostgresRepository(url!);
+    try {
+      // Only rate-limit migration exists in the isolated test DB at this stage.
+      await expect(repo.ping()).rejects.toThrow(/migrations or RLS incomplete/);
+      const required = [
+        "users", "refresh_tokens", "telecom_accounts", "subscriptions", "entitlements",
+        "phone_numbers", "e911_addresses", "e911_acknowledgements", "calls", "messages",
+        "voicemails", "consents", "usage_ledger", "fraud_events", "handoffs",
+        "used_once_keys", "sms_opt_outs", "takatak_outbox", "audit_log",
+        "push_tokens", "attested_devices", "ad_rewards", "public_leads",
+      ];
+      // Test metadata only. These empty CI fixtures are NOT production migrations.
+      for (const table of required) {
+        await first.unsafe("create table if not exists public." + table + " (id integer)");
+        await first.unsafe("alter table public." + table + " enable row level security");
+      }
+      await expect(repo.ping()).resolves.toBeUndefined();
+      await first.unsafe("alter table public.users disable row level security");
+      await expect(repo.ping()).rejects.toThrow(/migrations or RLS incomplete/);
+    } finally {
+      await first.unsafe("alter table public.users enable row level security");
+      await repo.close();
+    }
   });
 
   it("keeps the table private with RLS enabled", async () => {
