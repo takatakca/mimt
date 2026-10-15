@@ -24,6 +24,28 @@ import { twilioWebhooks } from "./routes/twilioWebhooks.js";
 import { voiceRoutes } from "./routes/voice.js";
 import { voicemailRoutes } from "./routes/voicemails.js";
 
+/** Exempt ONLY signed provider callback routes; unrecognized /webhooks/* URLs remain throttled. */
+const SIGNED_WEBHOOK_PATHS = new Set([
+  "/webhooks/stripe",
+  "/webhooks/twilio/voice/outbound",
+  "/webhooks/twilio/voice/inbound",
+  "/webhooks/twilio/voice/dial-result",
+  "/webhooks/twilio/voice/hangup",
+  "/webhooks/twilio/voice/status",
+  "/webhooks/twilio/voice/recording",
+  "/webhooks/twilio/voice/transcription",
+  "/webhooks/twilio/sms/inbound",
+  "/webhooks/twilio/sms/status",
+  "/webhooks/twilio/usage",
+]);
+
+/** Emergency setup and carrier callbacks must not depend on the abuse bucket service. */
+function bypassSharedHttpLimit(url: string): boolean {
+  const path = url.split("?")[0];
+  return path === "/healthz" || path === "/readyz" ||
+    path.startsWith("/v1/e911/") || SIGNED_WEBHOOK_PATHS.has(path);
+}
+
 type Routes = (app: import("fastify").FastifyInstance, deps: AppDeps) => Promise<void>;
 
 export async function buildApp(deps: AppDeps) {
@@ -40,8 +62,20 @@ export async function buildApp(deps: AppDeps) {
   await app.register(rateLimit, {
     max: 300,
     timeWindow: "1 minute",
-    // Twilio and Stripe retry on errors; their webhooks are authenticated by signature instead.
-    allowList: (req) => req.url.startsWith("/webhooks/"),
+    // Only actual signed provider callback URLs bypass the local limiter.
+    allowList: (req) => SIGNED_WEBHOOK_PATHS.has(req.url.split("?")[0]),
+  });
+
+  // Supplemental shared per-IP limit: @fastify/rate-limit retains route-specific
+  // limits locally, while the existing HMAC-keyed Postgres limiter coordinates
+  // HTTP volume across every API replica. Fail closed if its database is down.
+  // Never put the 9-1-1 call path, emergency setup, or signed callbacks here.
+  app.addHook("onRequest", async (req, reply) => {
+    if (bypassSharedHttpLimit(req.url)) return;
+    const allowed = await deps.rateLimiter.take(`http:ip:${req.ip}`, { capacity: 300, windowSeconds: 60 });
+    if (!allowed) {
+      return reply.code(429).send({ error: "rate_limited", message: "Too many requests; try again later" });
+    }
   });
 
   app.setErrorHandler((err: FastifyError | HttpError, req, reply) => {

@@ -50,20 +50,20 @@ export const AddressBody = z.object({
 export async function e911Routes(app: FastifyInstance, deps: AppDeps) {
   const { repo } = deps;
 
-  app.get("/v1/e911/notice", async (req): Promise<E911NoticeResponse> => {
+  app.get("/v1/e911/notice", { config: { rateLimit: false } }, async (req): Promise<E911NoticeResponse> => {
     const { locale } = parse(z.object({ locale: z.enum(["fr-CA", "en-CA"]).default("fr-CA") }), req.query);
     return e911Notice(deps.config.E911_NOTICE_VERSION, locale);
   });
 
   // Current address (to prefill the form). 404 when none is registered yet.
-  app.get("/v1/e911/address", { preHandler: requireUser(deps) }, async (req): Promise<E911AddressResponse> => {
+  app.get("/v1/e911/address", { config: { rateLimit: false }, preHandler: requireUser(deps) }, async (req): Promise<E911AddressResponse> => {
     const { account } = await loadContext(deps, req);
     const address = await repo.getE911Address(account.id);
     if (!address) throw notFound("no_e911_address", "No 9-1-1 address registered");
     return addressDto(address);
   });
 
-  app.put("/v1/e911/address", { preHandler: requireUser(deps) }, async (req): Promise<E911AddressResponse> => {
+  app.put("/v1/e911/address", { config: { rateLimit: false }, preHandler: requireUser(deps) }, async (req): Promise<E911AddressResponse> => {
     const body = parse(AddressBody, req.body);
     const { user, account } = await loadContext(deps, req);
     const customerName = body.customerName ?? user.displayName ?? "Client MIMT";
@@ -94,7 +94,7 @@ export async function e911Routes(app: FastifyInstance, deps: AppDeps) {
     return addressDto(saved);
   });
 
-  app.post("/v1/e911/acknowledge", { preHandler: requireUser(deps) }, async (req, reply) => {
+  app.post("/v1/e911/acknowledge", { config: { rateLimit: false }, preHandler: requireUser(deps) }, async (req, reply) => {
     const { noticeVersion } = parse(z.object({ noticeVersion: z.string().min(1).max(64) }), req.body);
     if (noticeVersion !== deps.config.E911_NOTICE_VERSION) throw conflict("stale_notice_version", `Current notice is ${deps.config.E911_NOTICE_VERSION}`);
     const { user } = await loadContext(deps, req);
