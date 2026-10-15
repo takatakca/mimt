@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-15 | GPT-6 (SECURITY-03A bounded buckets) | main | active | Bound memory used by token buckets, reject invalid inputs and protect limits under key-flood pressure; add deterministic tests | Verify CI, document remaining distributed-store requirement
+
 - 2026-10-14 | GPT-6 (WEB-04 link attribute audit) | agent/web04-link-attributes-20261014-3 → PR pending | done (local 7/7; full CI pending) | Fixed false-positive data-href/data-id in static link audit, 3 regression tests; separate from WEB-02 and 9-1-1 | Open PR, verify full CI, merge only if green; no deployment
 
 - 2026-10-14 | GPT-6 (MIMT WEB-02 consent integrity) | main | active | Align canonical FR/EN marketing consent copy across website/API, reject tampered opt-in evidence, add regression tests; no production deployment | Finish guarded change, run CI, update five handoff docs
