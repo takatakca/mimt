@@ -54,7 +54,24 @@ export class PostgresRepository implements Repository {
   }
 
   async ping() {
-    await this.sql`select 1`;
+    // Database connectivity is not sufficient for production readiness.
+    // Reject partially migrated MIMT databases or tables with disabled RLS,
+    // including the private shared anti-abuse bucket table.
+    const rows = await this.sql<{ readyCount: number }[]>`
+      select count(*)::integer as ready_count
+      from pg_catalog.pg_class c
+      join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity
+        and c.relname in (
+          'users', 'refresh_tokens', 'telecom_accounts', 'subscriptions', 'entitlements',
+          'phone_numbers', 'e911_addresses', 'e911_acknowledgements', 'calls', 'messages',
+          'voicemails', 'consents', 'usage_ledger', 'fraud_events', 'handoffs',
+          'used_once_keys', 'sms_opt_outs', 'takatak_outbox', 'audit_log',
+          'push_tokens', 'attested_devices', 'ad_rewards', 'public_leads',
+          'fraud_rate_buckets'
+        )
+    `;
+    if (rows[0]?.readyCount !== 24) throw new Error("MIMT database migrations or RLS incomplete");
   }
   async close() {
     await this.sql.end({ timeout: 5 });
