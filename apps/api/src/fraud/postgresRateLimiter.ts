@@ -77,3 +77,20 @@ export class PostgresRateLimiter implements RateLimiter {
     }
   }
 }
+
+/**
+ * Prune only expired buckets that have had no requests for > 1 extra hour.
+ * Run as a scheduled maintenance job (not in the emergency call path).
+ * Safe across replicas: DELETE and rate-limit updates take row locks.
+ */
+export async function pruneExpiredRateBuckets(sql: Sql): Promise<number> {
+  const rows = await sql<{ removed: number }[]>`
+    with removed as (
+      delete from public.fraud_rate_buckets
+      where last_seen_at + (window_seconds * interval '1 second') < clock_timestamp() - interval '1 hour'
+      returning 1
+    )
+    select count(*)::integer as removed from removed
+  `;
+  return rows[0]?.removed ?? 0;
+}

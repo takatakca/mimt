@@ -18,7 +18,8 @@
     "test": "vitest run",
     "job:numbers": "node dist/jobs/numberLifecycle.js",
     "job:costs": "node dist/jobs/dailyCost.js",
-    "job:twilio-guardrails": "node dist/jobs/twilioGuardrails.js"
+    "job:twilio-guardrails": "node dist/jobs/twilioGuardrails.js",
+    "job:prune-rate-limits": "node dist/jobs/pruneRateBuckets.js"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.1",

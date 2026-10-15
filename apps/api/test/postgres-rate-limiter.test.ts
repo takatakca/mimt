@@ -3,7 +3,7 @@ const hmacKey = Buffer.alloc(32, 42).toString("base64");
 import { readFileSync } from "node:fs";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { PostgresRateLimiter } from "../src/fraud/postgresRateLimiter.js";
+import { PostgresRateLimiter, pruneExpiredRateBuckets } from "../src/fraud/postgresRateLimiter.js";
 
 const url = process.env.MIMT_RATE_LIMIT_TEST_DATABASE_URL;
 const migration = new URL("../../../supabase/migrations/20261015173000_shared_rate_limit_buckets.sql", import.meta.url);
@@ -50,6 +50,24 @@ describe.skipIf(!url)("shared PostgreSQL rate limit (isolated CI database)", () 
     await first`update public.fraud_rate_buckets set updated_at = clock_timestamp() - interval '61 seconds' where key_hash = ${hash}`;
     expect(await b.take(key, rule)).toBe(true);
     expect(await a.take(key, rule)).toBe(false);
+  });
+
+  it("prunes fully expired identities but leaves recent limits intact", async () => {
+    const limiter = new PostgresRateLimiter(first, hmacKey);
+    const expired = "sms:expired-" + crypto.randomUUID();
+    const active = "sms:active-" + crypto.randomUUID();
+    const hash = (key: string) => createHmac("sha256", Buffer.from(hmacKey, "base64"))
+      .update("mimt-rate-limit-v1:").update(key).digest("hex");
+    const rule = { capacity: 1, windowSeconds: 60 };
+    expect(await limiter.take(expired, rule)).toBe(true);
+    expect(await limiter.take(active, rule)).toBe(true);
+    const oldHash = hash(expired);
+    await first`update public.fraud_rate_buckets
+      set last_seen_at = clock_timestamp() - interval '2 hours'
+      where key_hash = ${oldHash}`;
+    expect(await pruneExpiredRateBuckets(first)).toBeGreaterThanOrEqual(1);
+    expect((await first`select key_hash from public.fraud_rate_buckets where key_hash = ${oldHash}`)).toHaveLength(0);
+    expect(await limiter.take(active, rule)).toBe(false);
   });
 
   it("keeps the table private with RLS enabled", async () => {
