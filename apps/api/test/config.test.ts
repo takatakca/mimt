@@ -25,6 +25,12 @@ describe("config", () => {
     }
   });
 
+  it("requires an HMAC key whenever PostgreSQL is configured", () => {
+    expect(() => loadConfig({ DATABASE_URL: "postgresql://localhost/mimt" })).toThrow(/RATE_LIMIT_HMAC_KEY/);
+    expect(() => loadConfig({ DATABASE_URL: "postgresql://localhost/mimt", RATE_LIMIT_HMAC_KEY: "short" })).toThrow(/RATE_LIMIT_HMAC_KEY/);
+    expect(loadConfig({ DATABASE_URL: "postgresql://localhost/mimt", RATE_LIMIT_HMAC_KEY: Buffer.alloc(32, 42).toString("base64") }).DATABASE_URL).toBe("postgresql://localhost/mimt");
+  });
+
   it("requires Twilio, Stripe, keys and the database in production", () => {
     expect(() => loadConfig({ NODE_ENV: "production" })).toThrow(/TWILIO_ACCOUNT_SID.*required/);
     expect(() => loadConfig({ NODE_ENV: "production" })).toThrow(/STRIPE_SECRET_KEY/);

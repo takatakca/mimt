@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHmac } from "node:crypto";
 import type postgres from "postgres";
 import type { RateLimiter, RateRule } from "./rateLimiter.js";
 
@@ -9,17 +9,24 @@ type BucketRow = { tokens: number; elapsedSeconds: number };
  * Atomic PostgreSQL token bucket, shared between API replicas.
  *
  * A transaction serializes one bucket's INSERT/SELECT FOR UPDATE/UPDATE.
- * No untrusted key content is stored: SHA-256 protects phone/email/account IDs
+ * No untrusted key content is stored: HMAC-SHA256 protects phone/email/account IDs
  * from appearing in the database or in SQL diagnostic logs.
  *
  * Never invoke on the emergency (9-1-1) call path. On DB failure, return
  * false rather than granting a new allowance or falling back to memory.
  */
 export class PostgresRateLimiter implements RateLimiter {
+  private readonly secret: Buffer;
   constructor(
     private readonly sql: Sql,
+    secretBase64: string,
     private readonly onUnavailable: () => void = () => undefined,
-  ) {}
+  ) {
+    this.secret = Buffer.from(secretBase64, "base64");
+    if (this.secret.length !== 32 || this.secret.toString("base64") !== secretBase64) {
+      throw new Error("RATE_LIMIT_HMAC_KEY must contain exactly 32 bytes of canonical base64");
+    }
+  }
 
   async take(key: string, rule: RateRule, cost = 1): Promise<boolean> {
     if (!key || !Number.isFinite(rule.capacity) || rule.capacity <= 0 ||
@@ -29,7 +36,7 @@ export class PostgresRateLimiter implements RateLimiter {
       return false;
     }
     if (cost > rule.capacity) return false;
-    const hash = createHash("sha256").update(key).digest("hex");
+    const hash = createHmac("sha256", this.secret).update("mimt-rate-limit-v1:").update(key).digest("hex");
 
     try {
       return await this.sql.begin(async (tx) => {

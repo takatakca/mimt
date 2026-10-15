@@ -58,7 +58,7 @@ export function createDeps(config: Config, log: Logger): AppDeps {
     admobKeys: admobKeyLoader(config.ADMOB_SSV_KEYS_URL),
     cipher: new MessageCipher(cipherKey),
     rateLimiter: repo instanceof PostgresRepository
-      ? new PostgresRateLimiter(repo.sql, () => log.warn("shared rate limit storage unavailable; deny non-emergency requests"))
+      ? new PostgresRateLimiter(repo.sql, config.RATE_LIMIT_HMAC_KEY!, () => log.warn("shared rate limit storage unavailable; deny non-emergency requests"))
       : new InMemoryRateLimiter(),
     notifier: new LogNotifier(log),
     now: () => new Date(),

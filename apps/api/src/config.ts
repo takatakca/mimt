@@ -32,6 +32,7 @@ const EnvSchema = z
     CORS_ORIGINS: csv(["https://mimt.ca", "https://app.mimt.ca", "https://takatak.ca"]),
     TRUSTED_PROXY_CIDRS: csv([]),
     DATABASE_URL: optional,
+    RATE_LIMIT_HMAC_KEY: optional,
 
     TWILIO_ACCOUNT_SID: optional,
     TWILIO_API_KEY_SID: optional,
@@ -91,6 +92,12 @@ const EnvSchema = z
       .transform((v) => v === "true"),
   })
   .superRefine((env, ctx) => {
+    if (env.DATABASE_URL) {
+      const key = env.RATE_LIMIT_HMAC_KEY;
+      if (!key || Buffer.from(key, "base64").length !== 32 || Buffer.from(key, "base64").toString("base64") !== key) {
+        ctx.addIssue({ code: "custom", path: ["RATE_LIMIT_HMAC_KEY"], message: "32-byte canonical base64 secret required for PostgreSQL rate limiter" });
+      }
+    }
     for (const cidr of env.TRUSTED_PROXY_CIDRS) {
       if (!isTrustedProxyCidr(cidr)) ctx.addIssue({ code: "custom", path: ["TRUSTED_PROXY_CIDRS"], message: "Use explicit IP/CIDR (IPv4 /8-/32, IPv6 /32-/128), never trust all proxies" });
     }

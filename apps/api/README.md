@@ -32,6 +32,7 @@ Sans configuration, l'API démarre quand même : stockage en mémoire (sans `DAT
 | `CORS_ORIGINS` | | Liste séparée par virgules (défaut `mimt.ca`, `app.mimt.ca`, `takatak.ca`) |
 | `TRUSTED_PROXY_CIDRS` | | Adresses IP/réseaux du **proxy inverse immédiatement devant l'API**, séparés par virgules. Vide = ignorer les en-têtes `X-Forwarded-For` (défaut sûr). Vérifier dans l'hébergement avant configuration. Jamais `0.0.0.0/0` ou `::/0`. |
 | `DATABASE_URL` | oui | Postgres Supabase (connexion directe / service role) |
+| `RATE_LIMIT_HMAC_KEY` | oui lorsque `DATABASE_URL` est présent | Secret distinct de 32 octets en base64 pour cacher les numéros/courriels dans la table des quotas. Rotation avec revue : changer la clé réinitialise les quotas existants. |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_API_KEY_SID`, `TWILIO_API_KEY_SECRET` | oui | Appels REST Twilio (clé API, pas le jeton maître) |
 | `TWILIO_AUTH_TOKEN` | oui | **Uniquement** pour valider les signatures des webhooks |
 | `TWILIO_TWIML_APP_SID` | oui | TwiML App des appels sortants de l'application |

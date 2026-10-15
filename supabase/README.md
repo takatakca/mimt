@@ -6,7 +6,7 @@
 - `migrations/0002_push_tokens.sql` : jetons de notification des appareils (APNs/FCM) par utilisateur et plateforme, RLS lecture de ses propres lignes.
 - `migrations/0003_devices_rewards.sql` : appareils attestés et récompenses publicitaires. Aucune politique de lecture (rôle service seulement).
 - `migrations/0004_public_leads.sql` : demandes des visiteurs du site, avec RLS et refus d'accès direct pour `anon` et `authenticated`.
-- `migrations/20261015173000_shared_rate_limit_buckets.sql` : buckets de limitation anti-abus partagés; clés hachées et table privée avec RLS (aucune politique pour les clients).
+- `migrations/20261015173000_shared_rate_limit_buckets.sql` : buckets de limitation anti-abus partagés; clés HMAC-SHA256 avec secret distinct et table privée avec RLS (aucune politique pour les clients).
 - Bucket Storage privé `voicemail` (à créer dans le projet Supabase, pas public). L'API y copie les messages vocaux quand `SUPABASE_URL` et la clé service sont dans l'environnement.
 - RLS est activé sur **toutes** les tables. Le rôle `anon` n'a aucun accès. Les utilisateurs `authenticated` peuvent seulement **lire** leurs propres lignes (via `users.auth_user_id = auth.uid()`). Les tables sensibles (jetons, handoff, fraude, outbox, audit, désabonnements) n'ont aucune politique : refus total sauf pour le rôle service.
 - L'API se connecte avec la chaîne de connexion directe / service role (`DATABASE_URL`) et contourne RLS ; elle applique elle-même les règles d'accès.

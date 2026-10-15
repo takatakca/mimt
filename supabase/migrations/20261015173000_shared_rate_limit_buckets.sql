@@ -1,6 +1,6 @@
 -- SECURITY-03B: private shared rate limiter state for MIMT's API only.
 -- Must be applied to the dedicated MIMT Postgres instance, never to TAKATAK.
--- Each bucket key is SHA-256 hashed in the API; no phones, emails or user IDs here.
+-- Each bucket key is server-keyed HMAC-SHA256 hashed in the API; no phones, emails or user IDs here.
 create table if not exists public.fraud_rate_buckets (
   key_hash text primary key check (key_hash ~ '^[a-f0-9]{64}$'),
   tokens double precision not null check (tokens >= 0 and tokens < 1000000000),
