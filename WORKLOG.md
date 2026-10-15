@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-15 | GPT-6 (TEL-01 readiness) | main | active | Verify complete MIMT DB schema and RLS for /readyz, not just SELECT 1; add isolated PostgreSQL regression | Validate CI and update five handoff docs, keep production gates closed
+
 - 2026-10-15 | GPT-6 (SECURITY-03B shared limiter) | main | done (code/CI; DB production pending) | Added transactional PostgreSQL shared buckets, HMAC-SHA256 private keys, fail-closed DB outage handling, migration + isolated PostgreSQL 16 CI concurrency tests and safe expiry pruning; full CI #38775431115 successful at e5079982 | Next: provision independent MIMT Supabase, apply/review migration, configure RATE_LIMIT_HMAC_KEY; Fastify IP limiter and other jobs still not distributed; keep CD disabled
 
 - 2026-10-15 | GPT-6 (SECURITY-03A bounded buckets) | main | done (distributed deployment pending) | Capped in-memory token buckets to 50,000 active keys with fail-closed overflow, idle bucket sweeping, clock rollback handling and invalid input guards; 3 regression tests; full CI #38734095766 green at 4d0f81c6 | Next: implement atomic shared limiter before scaling beyond one API instance, no effect on 9-1-1 override
