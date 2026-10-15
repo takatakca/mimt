@@ -12,7 +12,7 @@ create index if not exists fraud_rate_buckets_expiry_idx on public.fraud_rate_bu
 alter table public.fraud_rate_buckets enable row level security;
 revoke all on public.fraud_rate_buckets from public;
 -- Supabase roles exist on managed projects; local vanilla Postgres may not have them.
-do $
+do $mimt_roles$
 begin
   if exists (select 1 from pg_roles where rolname = 'anon') then
     execute 'revoke all on public.fraud_rate_buckets from anon';
@@ -20,7 +20,7 @@ begin
   if exists (select 1 from pg_roles where rolname = 'authenticated') then
     execute 'revoke all on public.fraud_rate_buckets from authenticated';
   end if;
-end $;
+end $mimt_roles$;
 -- This is a server-side-only table. Never grant browser Data API access.
 -- Operational cleanup (after checking that all buckets are fully refilled):
 -- delete from public.fraud_rate_buckets
