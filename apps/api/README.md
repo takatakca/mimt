@@ -157,3 +157,10 @@ Avec `DATABASE_URL`, tous les quotas métier `deps.rateLimiter` utilisent des co
 La CI démarre un Postgres 16 isolé et exécute des tests de concurrence et de purge `apps/api/test/postgres-rate-limiter.test.ts`. En exploitation, exécuter la tâche `pnpm --filter @mimt/api job:prune-rate-limits` (ou `node dist/jobs/pruneRateBuckets.js` après compilation) quotidiennement depuis l'environnement API, sans journaliser les clés. Le plugin HTTP global `@fastify/rate-limit` et l'outbox ne sont **pas encore** distribués entre réplicas, donc ne pas activer l'autoscaling.
 
 **Vérification de disponibilité :** `/healthz` signale uniquement que le processus répond. `/readyz` nécessite à présent les 24 tables privées MIMT de l'ensemble des migrations et la RLS active (plus les indicateurs de configuration fournisseur existants). Un simple Postgres joignable sans schéma complet ne suffit pas : réponse 503. La CI teste les erreurs de schéma/RLS sur une base isolée; le test des permissions des rôles et des services réels reste requis.
+
+## Protection multi-instance (état du code au 15 octobre 2026)
+
+- Le quota global HTTP exploite le `PostgresRateLimiter` partagé avec HMAC quand la base MIMT dédiée est configurée; en développement sans base, il utilise le limiteur local. Les quotas spécifiques `@fastify/rate-limit` restent locaux; ne pas présumer que l'ensemble des règles est distribué.
+- Les endpoints d'urgence et de configuration 9-1-1, la santé et les callbacks signés connus sont exclus du quota partagé. Une URL inconnue sous `/webhooks/` ne contourne plus la limitation.
+- Le poller `takatak_outbox` utilise une réservation SQL atomique avec un bail de 120 s et cinq événements maximum, aucune nouvelle migration, et chaque corps signé contient un `id` stable. **Le serveur récepteur TAKATAK doit dédupliquer les ID d'événements** pour se protéger d'une retransmission après crash (livraison *at-least-once*).
+- CI confirmées : `38791371698` et `38792255274`; **aucune preuve d'installation de ces commits en production**. Ne pas activer les déploiements tant que Supabase MIMT séparé, HMAC, secrets, Twilio et 9-1-1 ne sont pas approuvés et vérifiés.

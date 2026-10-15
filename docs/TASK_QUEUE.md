@@ -62,3 +62,10 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 
 - **TEL-01-SCHEMA — fait dans le dépôt, pas en production (15 octobre 2026)** : `/readyz` refuse une base partiellement migrée ou avec RLS désactivé; 24 tables requises, tests SQL isolés et CI `38776170530` verte. **TEL-01 déploiement** reste bloqué par base MIMT indépendante, migration appliquée, secrets et vérification de la santé réelle.
 - **SECURITY-01 — reste à effectuer en environnement MIMT réel** : tests des permissions `anon` / `authenticated`, restrictions de service et RLS par entreprise, pas seulement la présence du drapeau RLS.
+
+## Progression supplémentaire — 15 octobre 2026
+
+- **SECURITY-03C — code terminé, CI verte :** quota HTTP transversal par IP partagé entre instances utilisant PostgreSQL, exceptions de priorité aux 9-1-1/monitoring et aux callbacks signés; URL `/webhooks/` inconnues n'ont plus d'exemption. Quatre tests de régression. SHA `356e5312`, CI `38791371698`. **Reste :** quotas spécifiques Fastify locaux à évaluer pour les déploiements multiples.
+- **OPS-01A — code terminé, CI verte :** prise de bail atomique des événements `takatak_outbox` avec récupération après interruption, concurrence vérifiée dans PostgreSQL 16 isolé. SHA `35b693ac`, CI `38792255274`. **Reste :** validation du traitement idempotent à destination côté TAKATAK pour garantir l'absence de double effet métier malgré les reprises.
+- **OPS-01B — à faire en coordination :** vérifier idempotence du receveur TAKATAK et observabilité des baux/reprises. Ne pas modifier TAKATAK depuis le repository MIMT.
+- **Déploiements** : API et Web `skipped`. Aucune validation de l'hébergeur ou de la DB dédiée; tâches de publication conservées bloquées.

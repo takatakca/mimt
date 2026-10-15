@@ -51,3 +51,8 @@ Implémenter les quotas anti-abus métier partagés sur la base PostgreSQL **MIM
 ## D-18 — Disponibilité Postgres conditionnée aux migrations et à RLS (15 octobre 2026)
 
 Un simple `select 1` ne suffit pas à dire l'API télécom prête. `PostgresRepository.ping` vérifie les 24 tables de la base MIMT attendue (schéma `public`) avec RLS actif avant le statut `/readyz` ; une base partiellement migrée doit retourner `503`. Justification : éviter le faux « prêt » et l'ouverture d'une API privée dépourvue de protections structurelles. Code `apps/api/src/repo/postgres.ts`, test sur PostgreSQL isolé, [CI #38776170530](https://github.com/takatakca/mimt/actions/runs/38776170530) réussie. **Limite :** des politiques RLS incorrectes peuvent exister malgré le drapeau actif; des essais multi-rôles restent obligatoires avant production.
+
+## Décisions D-17 et D-18 — 15 octobre 2026
+
+- **D-17 / Quota HTTP inter-instances :** ajouter un contrôle de 300 requêtes/minute/IP à l'aide du même magasin PostgreSQL et des clés HMAC que les limites métier, sans rediriger les appels d'urgence, les opérations E911, la santé ni les callbacks signés dans un chemin bloqué par la base anti-abus. Les quotas par route fournis par Fastify restent locaux. Vérification CI `38791371698`.
+- **D-18 / Outbox TAKATAK at-least-once :** réserver les événements via verrous de lignes `SKIP LOCKED` et `next_attempt_at` avec bail court, sans nouvelle table ni migration. Cette réservation résout la concurrence ordinaire des travailleurs, **pas** le cas succès HTTP suivi d'un crash avant l'acquittement SQL. Les récepteurs TAKATAK doivent implémenter l'idempotence sur l'ID stable. Vérification CI `38792255274`. Toute modification de TAKATAK nécessite une coordination distincte.

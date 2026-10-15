@@ -1,5 +1,19 @@
 # MIMT — Relève automatique d'agent
 
+## Relève vérifiée — 15 octobre 2026 (SECURITY-03C et OPS-01)
+
+- **Dernière tâche terminée :** `OPS-01`, réservation atomique avec `FOR UPDATE SKIP LOCKED` de la file des webhooks TAKATAK et bail de 120 s; limitation HTTP partagée `SECURITY-03C` réalisée juste avant. Les exceptions 9-1-1 et callbacks signés sont préservées.
+- **Tâche en cours / prochaine :** audit opérationnel de la réception idempotente des événements côté TAKATAK (sans modifier le dépôt maître depuis MIMT), revue des risques de limitation par route encore locale, finalisation de WEB-01/WEB-02 et validation de l'infrastructure MIMT.
+- **Dernier SHA fonctionnel poussé :** `35b693ace8e846fe43c4addd3a45d069a8b1b3a5`, [CI `38792255274`](https://github.com/takatakca/mimt/actions/runs/38792255274) **réussie**, dont PostgreSQL 16 isolé et concurrence des prises en charge; `SECURITY-03C` SHA `356e53126c552eeeb054194d2c508d0574a814ab`, [CI `38791371698`](https://github.com/takatakca/mimt/actions/runs/38791371698) réussie. **Le commit de cette relève fera avancer HEAD; lire la branche au prochain lancement.**
+- **Fichiers modifiés :** `WORKLOG.md`; `apps/api/src/app.ts`, `apps/api/src/routes/e911.ts`, `apps/api/test/shared-http-limit.test.ts`; `apps/api/src/repo/types.ts`, `apps/api/src/repo/memory.ts`, `apps/api/src/repo/postgres.ts`, `apps/api/src/services/outbox.ts`, `apps/api/test/outbox-leasing.test.ts`; puis les cinq documents `docs/` et le README API.
+- **Vérifications exécutées :** GitHub HEAD `657ea866` au départ, PR/issues ouverts : aucun; inspection du code, des workflows et de la relève. GitHub Actions a exécuté `pnpm typecheck`, `pnpm test` dont services PostgreSQL 16 isolés, `pnpm --filter @mimt/web build` et contrôles des 28 routes Web. Une CI initiale `38791193077` échouait sur un type TS strict; corrigée au SHA `356e5312`, CI verte. Aucun test sur transporteur, serveur MIMT ou accès 9-1-1 réel.
+- **Déploiement réel :** `Deploy MIMT Website` et `Deploy MIMT API` sur `35b693ac` **skipped** ([runs API `38792424529`](https://github.com/takatakca/mimt/actions/runs/38792424529), [Web `38792424513`](https://github.com/takatakca/mimt/actions/runs/38792424513)); pas de preuve SHA sur `mimt.ca` ni d'une API `api.mimt.ca` en santé. Les URL `/deploy-version.txt`, `/healthz`, `/readyz` n'étaient pas accessibles via l'outil de consultation; cela ne prouve pas une panne réelle.
+- **Blocages :** les cinq projets Supabase accessibles ne comprennent toujours **aucun projet MIMT identifiable**. Ne jamais appliquer ces migrations à TAKATAK STAGING ou aux autres entreprises. Accès Coolify/SSH, drapeaux et secrets GitHub, Twilio, Stripe, identification du responsable de la vie privée, conformité CRTC et 9-1-1 restent à confirmer. Les quotas spécifiques `@fastify/rate-limit` sont locaux, malgré le garde HTTP global partagé; les événements TAKATAK ont une garantie *at-least-once* et exigent une déduplication par ID chez le receveur.
+- **Accès et action exacte suivante :** vérifier le HEAD et la CI documentaire; maintenir les drapeaux CD fermés. Faire contrôler par l'agent TAKATAK la déduplication du champ stable `id` des webhooks; identifier un projet DB MIMT canadien non facturable sans accord préalable, ou solliciter l'autorisation si des coûts seraient engagés; installer et auditer les migrations, configurer `RATE_LIMIT_HMAC_KEY`, valider le serveur réel et `readyz`. Sinon poursuivre les tâches de test/défense indépendantes sans déploiement.
+
+---
+
+
 ## Relève du 15 octobre 2026 — TEL-01 schéma & RLS comme condition de disponibilité
 
 - **Dernière tâche terminée :** `PostgresRepository.ping()` impose désormais les 24 tables critiques de la base télécom MIMT avec RLS activé avant que `GET /readyz` rende un état DB prêt; plus de simple `SELECT 1`. Tests avec Postgres 16 isolé : table absente, métadonnées complètes, puis RLS désactivé. Aucun contenu client réel ni connexion à un autre produit.

@@ -93,3 +93,11 @@ Les gates Web `MIMT_WEB_DEPLOY_ENABLED` et `MIMT_WEB_PARITY_REVIEWED` ainsi que 
 L'API liée à PostgreSQL n'indique désormais `db: up` qu'avec **24 tables MIMT** reconnues et la RLS activée pour chacune; absence de migration ou RLS désactivée => réponse `503`. Cela couvre `0001`–`0004` et `20261015173000_shared_rate_limit_buckets.sql`. La CI [38776170530](https://github.com/takatakca/mimt/actions/runs/38776170530) prouve le comportement sur une base **isolée** mais n'exécute pas les migrations commerciales. Vérifier également les vraies politiques RLS au moyen des rôles d'essai avant d'activer un hébergement réel; `readyz` seul ne démontre pas leur correction.
 
 Les URL publiques `https://mimt.ca/deploy-version.txt`, `https://api.mimt.ca/healthz` et `https://api.mimt.ca/readyz` n'étaient pas récupérables dans la vérification web de cette session. Ne jamais présumer que le SHA GitHub est déployé.
+
+## Contrôles supplémentaires API — 15 octobre 2026
+
+**Global HTTP :** `SECURITY-03C` appelle le magasin de token-buckets `deps.rateLimiter` pour un quota partagé de 300 requêtes/minute/IP lorsque `DATABASE_URL` et `RATE_LIMIT_HMAC_KEY` sont réellement configurés. Les routes de santé, les parcours `/v1/e911/` et les callbacks fournisseurs **connus et signés** sont exemptés du quota global; la vérification de signature du callback reste obligatoire. Les limites Fastify spécifiques à certaines routes restent locales (à faire évoluer si nécessaire). GitHub CI `38791371698` réussie, pas de publication.
+
+**Outbox TAKATAK :** les travailleurs réclament au maximum cinq événements à la fois en écrivant atomiquement une échéance `next_attempt_at` de +120 s, grâce au verrouillage `FOR UPDATE SKIP LOCKED`. L'envoi utilise des IDs stables et une temporisation HTTP de 10 s/événement. Après crash, les événements redeviennent admissibles lorsque le bail expire. Cela évite les prises concurrentes ordinaires, mais **n'offre pas l'exactement-une-fois** ; le consommateur TAKATAK doit dédupliquer les effets métiers sur l'ID d'événement. CI Postgres `38792255274` verte. **Aucune migration additionnelle** pour ce mécanisme, car `next_attempt_at` existait déjà.
+
+Ne pas activer Coolify ni le CD sans schéma MIMT en place et test des webhooks de bout en bout. Aucun projet Supabase MIMT connecté n'a été identifié. Ne pas utiliser les projets des autres produits.
