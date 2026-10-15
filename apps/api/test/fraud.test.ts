@@ -80,6 +80,54 @@ describe("rate limiter", () => {
   });
 });
 
+describe("bounded in-memory rate limiter", () => {
+  it("fails closed under a flood of distinct keys without resetting an active bucket", async () => {
+    let t = 0;
+    const rl = new InMemoryRateLimiter(() => t, 2);
+    const rule = { capacity: 1, windowSeconds: 60 };
+    expect(await rl.take("attacker-a", rule)).toBe(true);
+    expect(await rl.take("attacker-b", rule)).toBe(true);
+    expect(await rl.take("attacker-c", rule)).toBe(false);
+    // Existing identity remains blocked: it was not evicted to make room.
+    expect(await rl.take("attacker-a", rule)).toBe(false);
+    t += 59_999;
+    expect(await rl.take("attacker-c", rule)).toBe(false);
+    t += 1;
+    expect(await rl.take("attacker-c", rule)).toBe(true);
+    expect(await rl.take("attacker-c", rule)).toBe(false);
+  });
+
+  it("keeps limits intact if the clock moves backwards", async () => {
+    let t = 10_000;
+    const rl = new InMemoryRateLimiter(() => t);
+    const rule = { capacity: 1, windowSeconds: 60 };
+    expect(await rl.take("k", rule)).toBe(true);
+    t = 0;
+    expect(await rl.take("k", rule)).toBe(false);
+    t = 10_000;
+    expect(await rl.take("k", rule)).toBe(false);
+    t = 70_000;
+    expect(await rl.take("k", rule)).toBe(true);
+  });
+
+  it("refuses invalid rules and costs rather than mutating the limiter", async () => {
+    const rl = new InMemoryRateLimiter();
+    expect(() => new InMemoryRateLimiter(Date.now, 0)).toThrow(/maxBuckets/);
+    for (const rule of [
+      { capacity: 0, windowSeconds: 60 },
+      { capacity: 1, windowSeconds: 0 },
+      { capacity: Number.NaN, windowSeconds: 60 },
+      { capacity: 1, windowSeconds: Number.POSITIVE_INFINITY },
+    ]) {
+      await expect(rl.take("k", rule)).rejects.toThrow(/Invalid rate limiter/);
+    }
+    await expect(rl.take("", { capacity: 1, windowSeconds: 60 })).rejects.toThrow();
+    await expect(rl.take("k", { capacity: 1, windowSeconds: 60 }, -1)).rejects.toThrow();
+    expect(await rl.take("k", { capacity: 1, windowSeconds: 60 }, 2)).toBe(false);
+    expect(await rl.take("k", { capacity: 1, windowSeconds: 60 })).toBe(true);
+  });
+});
+
 describe("content", () => {
   it("detects OTP-shaped texts and counts segments", () => {
     expect(looksLikeOtp("Votre code de vérification: 123456")).toBe(true);
