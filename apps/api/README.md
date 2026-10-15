@@ -149,3 +149,9 @@ TEST_DATABASE_URL=postgres://localhost/mimt_test pnpm --filter @mimt/api test
 `POST /v1/public/leads` accepte `waitlist`, `demo` et `contact` avec `Origin: https://mimt.ca`, applique validation de formulaire, limitation d'abus et enregistre la demande dans `public_leads`. Aucun identifiant ou donnée privée ne figure dans la réponse `202 {"accepted":true}`.
 
 Appliquer `0004_public_leads.sql` sur la base séparée MIMT, vérifier la RLS, l'API HTTPS et le CORS, puis configurer `MIMT_WEB_FORMS_ENDPOINT` dans les variables GitHub Actions du site. Ne pas diffuser de marketing avant confirmation de l'adresse et du consentement. Tests : `apps/api/test/public-leads.test.ts`. Aucun déploiement public n'est confirmé ici.
+
+### Protection partagée contre l'abus (préparation production)
+
+Avec `DATABASE_URL`, tous les quotas métier `deps.rateLimiter` utilisent des compteurs transactionnels PostgreSQL. Configurer aussi `RATE_LIMIT_HMAC_KEY` (32 octets aléatoires encodés en base64), jamais dans l'interface Web. Appliquer **avant le premier lancement** `supabase/migrations/20261015173000_shared_rate_limit_buckets.sql` à la base MIMT dédiée. Sans la table ou lors d'une panne DB, les actions soumises à quotas sont refusées, sans passer silencieusement en mode mémoire. Les appels d'urgence suivent un chemin distinct et ne sont pas soumis à ces quotas.
+
+La CI démarre un Postgres 16 isolé et exécute des tests de concurrence et de purge `apps/api/test/postgres-rate-limiter.test.ts`. En exploitation, exécuter la tâche `pnpm --filter @mimt/api job:prune-rate-limits` (ou `node dist/jobs/pruneRateBuckets.js` après compilation) quotidiennement depuis l'environnement API, sans journaliser les clés. Le plugin HTTP global `@fastify/rate-limit` et l'outbox ne sont **pas encore** distribués entre réplicas, donc ne pas activer l'autoscaling.

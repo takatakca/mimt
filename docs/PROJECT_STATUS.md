@@ -69,3 +69,11 @@ Correctif proposé : `data-href` n'est pas un lien, `data-id` n'est pas une cibl
 - Code poussé au SHA `4d0f81c6c32fa51712ff323cfe5af800a3c6d5ef`, [CI #38734095766](https://github.com/takatakca/mimt/actions/runs/38734095766) **réussie**. La rédaction de cette relève ajoute un commit documentaire sur main, dont la CI doit être consultée après push.
 - **Non résolu** : plafonds toujours indépendants entre les instances. La production multi-réplica n'est **pas autorisée** avant limitation distribuée et essais concurrentiels. Les appels d'urgence 9-1-1 conservent leur exception explicite; aucun test fournisseur réel réalisé.
 - **Production** : aucune preuve de SHA servi ni de déploiement API, Web, base ou téléphonie. Blocages antérieurs inchangés.
+
+## Mise à jour du 15 octobre 2026 — compteurs partagés
+
+- **SECURITY-03B codé et vérifié** : `PostgresRateLimiter` transactionnel (verrou de ligne), limites partagées pour OTP/SMS/appels non urgents/formulaires, refus en cas de panne DB, HMAC-SHA256 avec clé dédiée, migration SQL de table privée + RLS et script de purge. CI PostgreSQL 16 réelle [#38775431115](https://github.com/takatakca/mimt/actions/runs/38775431115) verte pour le commit technique `e5079982f4551f3cc6b05c15bf51d5292f3e8226`.
+- **Incident CI corrigé :** premier test de migration échoué (`38774365493`) à cause d'un délimiteur SQL `DO` mal formé; réparé et revérifié par `38774727808`. Validation du HMAC `38775103461` : réussie.
+- **Base en ligne :** liste actuelle Supabase interrogée : aucun projet nommé MIMT parmi les cinq accessibles. **Aucune migration appliquée** à un projet client. Le besoin de créer/identifier MIMT dédié Canada demeure.
+- **Risque résiduel :** le plugin Fastify de quota global IP conserve un état par processus; les jobs/outbox ne sont pas prêts pour plusieurs replicas. La migration est un prérequis du nouveau binaire API, faute de quoi les requêtes limitées seront refusées. Aucun 9-1-1 réel testé.
+- **Déploiements :** workflows SSH Web et API Coolify encore `skipped`. Le site et l'API publics ne peuvent pas être déclarés synchronisés au SHA GitHub.

@@ -52,3 +52,10 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 - **SECURITY-03A — fait côté code, CI réussie** : token-bucket mémoire borné à 50 000 clés, purge des seules clés inactives, refus de nouvelles clés en cas de saturation, tests de refus/recul d'horloge/règles invalides. Commit `4d0f81c6`, CI `38734095766` verte.
 - **SECURITY-03B — À FAIRE** : limitation atomique partagée et stockage fiable MIMT pour les règles anti-abus (OTP, SMS, appels ordinaires et leads) en contexte multi-instance, tests de simultanéité et de panne de base. Ne pas bloquer les appels d'urgence, même si le magasin partagé est indisponible. Ne pas déclarer multi-instance sécurisé sans preuves.
 - **WEB-02 — autre agent actif** selon `WORKLOG.md` : ne pas modifier les fichiers de consentement en parallèle. Ne pas activer le formulaire en production avant que l'API et la base dédiée soient vérifiées.
+
+## SECURITY-03B — progression technique du 15 octobre 2026
+
+- **Code et CI : faits** — nouveau backend de limitation SQL atomique (OTP, SMS, appels ordinaires, leads), HMAC côté serveur, migration RLS privée, refus sur erreur DB, purge conditionnelle; tests concurrents réels PostgreSQL 16 réussis ([CI #38775431115](https://github.com/takatakca/mimt/actions/runs/38775431115)) au commit `e5079982`.
+- **SECURITY-03B-PROD : bloqué** — créer/identifier la base Supabase MIMT distincte, revoir puis appliquer la migration privée après les migrations historiques, fournir `RATE_LIMIT_HMAC_KEY` en coffre-fort, vérifier santé et comportement de refus. **Pas de preuve de production**.
+- **SECURITY-03C : à faire** — le rate-limit global Fastify par IP (`@fastify/rate-limit`) et l'outbox/pollers sont encore par processus. Intégration distribuée et tests de concurrence supplémentaires requis avant autoscaling.
+- **WEB-02 : ne pas modifier en doublon** — une ligne du WORKLOG reste `active` pour un autre agent; la séparation TAKATAK/MIMT, LCAP, données privées et l'obligation 9-1-1 demeurent applicables.

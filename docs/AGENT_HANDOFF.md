@@ -1,5 +1,19 @@
 # MIMT — Relève automatique d'agent
 
+## Relève du 15 octobre 2026 — SECURITY-03B (tests SQL validés)
+
+- **Dépôt / main initial :** `takatakca/mimt`, SHA `e5cbe7bfadfe68e9e5c4400f39b25ebf16071e25` ; CI initiale `38734604699` verte; aucune PR/issue ouverte, CD ignoré. Tâche WEB-02 déjà active par un autre agent, non touchée.
+- **Dernière tâche code terminée :** limiteur métier partagé PostgreSQL (`OTP`, `SMS`, appels sortants ordinaires, leads), consommation atomique via transaction + verrou, fail-closed si stockage indisponible, clés HMAC-SHA256 avec secret `RATE_LIMIT_HMAC_KEY` séparé et purge uniquement des buckets expirés. Aucun changement au chemin prioritaire du 9-1-1.
+- **Commit technique le plus récent :** `e5079982f4551f3cc6b05c15bf51d5292f3e8226`, [CI réussie #38775431115](https://github.com/takatakca/mimt/actions/runs/38775431115) avec tests PostgreSQL 16 isolé (concurrence 50 requêtes sur deux pools, recharge, RLS, panne de base, purge et protection de clés). Première CI SQL `38774365493` échouée sur délimiteur mal formé; correctif `8256196` puis CI `38774727808` réussie; HMAC `75652f3` puis CI `38775103461` réussie. Le présent commit documentaire fera avancer HEAD ; le revérifier au prochain passage.
+- **Fichiers modifiés :** `WORKLOG.md`, `apps/api/src/fraud/postgresRateLimiter.ts`, `apps/api/src/bootstrap.ts`, `apps/api/src/config.ts`, `apps/api/src/jobs/pruneRateBuckets.ts`, `apps/api/test/postgres-rate-limiter.test.ts`, `apps/api/test/config.test.ts`, `apps/api/package.json`, `apps/api/.env.example`, `apps/api/README.md`, `.github/workflows/ci.yml`, `supabase/migrations/20261015173000_shared_rate_limit_buckets.sql`, `supabase/README.md` et les cinq fichiers de relève.
+- **Vérifications exécutées :** API GitHub `branches/main`, historique/branches, PR/issues, workflows; GitHub Actions `pnpm typecheck`, `pnpm test` avec Postgres 16, export statique et vérification des liens ; interrogation en lecture de la connexion Supabase : **cinq projets existants, aucun MIMT identifié**. Pas de migration exécutée sur un serveur client.
+- **Statut de déploiement :** dernier CD Web et API consultés `skipped`, aucun SHA en production démontré. Pas de configuration SSH/Coolify MIMT validée. Aucun appel 9-1-1 ni essai opérateur réel exécuté.
+- **Blocages / limites :** absence de base dédiée MIMT; secret HMAC à placer dans le coffre-fort; migration `20261015173000` non appliquée en production; limite `@fastify/rate-limit` par IP toujours en mémoire par réplica, jobs/outbox non distribués. **Ne pas déclarer production multi-réplica prête.** Secrets Twilio/Stripe/IdP, conformité 9-1-1 et revues réglementaires toujours non vérifiés.
+- **Tâche actuelle / prochaine action exacte :** vérifier HEAD et CI du commit documentaire; créer/identifier projet Supabase MIMT Canada dédié avec contrôle du propriétaire et coût, appliquer et auditer migrations `0001` à `0004` puis `20261015173000` dans un ordre contrôlé (ne pas appliquer dans TAKATAK); configurer `RATE_LIMIT_HMAC_KEY` et tester `readyz`; avancer un magasin central pour le rate-limit HTTP et la coordination outbox avant tout déploiement multi-réplica. Réaliser parité visuelle Web FR/EN et l'approbation 9-1-1 avant lancement.
+
+---
+
+
 ## Session du 15 octobre 2026 — SECURITY-03A : limiteur mémoire borné
 
 - **HEAD vérifié au démarrage :** `06817d3a53fa77f47549378e37861f8c8249bd69` sur `main`; CI [#38647530229](https://github.com/takatakca/mimt/actions/runs/38647530229) réussie, CD API et Web `skipped`. Aucun PR ni issue ouverts. WEB-02 (consentement) était `active` dans `WORKLOG.md`; aucun de ses fichiers n'a été touché.

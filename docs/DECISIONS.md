@@ -41,3 +41,9 @@ Mise à jour : 2026-10-14. Distinguer décisions approuvées, orientations de co
 ## D-16 — Limiteur mémoire à capacité bornée (15 octobre 2026)
 
 Il est interdit d'évincer une clé encore active pour accueillir de nouvelles clés de requêtes : cela effacerait son quota de sécurité. Le limiteur mono-processus purge seulement les entrées inactives dont la fenêtre de recharge est écoulée, puis **refuse** les nouvelles clés si les 50 000 emplacements sont occupés; les règles invalides et retours d'horloge ne donnent aucun jeton. Les règles anti-abus du 9-1-1 sont exclues de son chemin prioritaire. Ce mécanisme limite l'empreinte mémoire mais ne remplace pas un compteur partagé pour plusieurs instances. `apps/api/src/fraud/rateLimiter.ts`, CI `38734095766`.
+
+## D-17 — Quotas métier atomiques privés (15 octobre 2026)
+
+Implémenter les quotas anti-abus métier partagés sur la base PostgreSQL **MIMT uniquement** : une transaction et un verrou `SELECT FOR UPDATE` sérialisent les crédits par identité; conserver uniquement un HMAC-SHA256 des clés avec secret distinct `RATE_LIMIT_HMAC_KEY`, refuser les demandes limitées en cas de panne sans repli sur des quotas locaux. La table est privée avec RLS, ni `anon` ni `authenticated` ne doivent y avoir accès; les enregistrements expirés peuvent être purgés après la fenêtre de recharge plus une marge. Le chemin d'appel d'urgence 9-1-1 ne consulte pas ce limiteur. Code `apps/api/src/fraud/postgresRateLimiter.ts`, migration `20261015173000_shared_rate_limit_buckets.sql`; CI réelle `38775431115` réussie.
+
+**Non approuvé :** activation en production ou plusieurs réplicas avant projet MIMT dédié, migration appliquée, secret sécurisé, limite HTTP distribuée et coordination de l'outbox. Cette décision ne prétend pas que les contraintes télécom/CRTC sont satisfaites.

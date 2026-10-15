@@ -75,3 +75,15 @@ La nouvelle implémentation `InMemoryRateLimiter` impose un plafond de 50 000 cl
 **Important :** les limites demeurent indépendantes entre les réplicas Fastify. Ne pas configurer la production MIMT en plusieurs réplicas, autoscaling ou plusieurs instances d'API tant qu'un limiter atomique **partagé** n'est pas implémenté, testé sous concurrence et surveillé. Une saturation peut refuser les demandes non urgentes; monitorer les taux 429 et les volumes de clés distinctes. Ce contrôle ne doit jamais être appelé dans le chemin prioritaire du 9-1-1.
 
 Les gates Web `MIMT_WEB_DEPLOY_ENABLED` et `MIMT_WEB_PARITY_REVIEWED` ainsi que la ressource API `MIMT_API_DEPLOY_ENABLED` demeurent fermés en l'absence d'infrastructure MIMT confirmée, d'approbations et de preuve SHA live.
+
+## Déploiement conditionnel de SECURITY-03B — 15 octobre 2026
+
+**Aucun déploiement MIMT confirmé.** Le code `PostgresRateLimiter` utilise maintenant la connexion directe au projet Postgres MIMT. À toute première activation de l'API mise à jour, **appliquer au préalable** `supabase/migrations/20261015173000_shared_rate_limit_buckets.sql` dans la base MIMT dédiée, en plus des migrations `0001`–`0004` et du contrôle de RLS. Cette migration n'a été testée que sur un conteneur PostgreSQL 16 isolé dans GitHub Actions.
+
+**Secret nécessaire :** `RATE_LIMIT_HMAC_KEY` = 32 octets aléatoires en base64 (générer dans le coffre-fort : `openssl rand -base64 32`). Le serveur refuse la configuration avec `DATABASE_URL` si ce secret est absent/invalide. Garder la même valeur sur tous les réplicas; sa rotation réinitialise les clés de quota et nécessite une procédure de migration. Ne l'ajouter jamais dans un fichier public ou un message.
+
+**Tests exécutés :** `pnpm test` contre PostgreSQL 16 dans GitHub Actions, avec `MIMT_RATE_LIMIT_TEST_DATABASE_URL` réservé au conteneur CI; succès du commit `e5079982` via `38775431115`. Vérification DB live, restauration et contrôle de charge réelle : non exécutés.
+
+**Entretien :** après configuration de l'API réelle et autorisation des tâches planifiées Coolify, exécuter par exemple une fois par jour `node apps/api/dist/jobs/pruneRateBuckets.js` (ou `pnpm --filter @mimt/api job:prune-rate-limits` depuis le dépôt avec build). La purge ne supprime que les clés inactives depuis leur fenêtre entière plus une heure; ne pas ouvrir d'accès public à la table.
+
+**Interdiction d'autoscaling :** les limites métier sont partagées, mais le plugin HTTP `@fastify/rate-limit` et l'outbox/pollers restent locaux. Ne pas mettre plusieurs réplicas en production sans tests et synchronisation globale. Le 9-1-1 est hors quotas anti-abus ordinaires et reste une obligation de vérification opérateur.
