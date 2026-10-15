@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-15 | GPT-6 (OPS-01 outbox lease) | main | active | Atomically claim due TAKATAK outbox events with PostgreSQL row locks and short leases to avoid concurrent duplicate dispatch; keep stable event IDs and retry on crashes | Add SQL concurrency tests, CI, docs; no live deploy
+
 - 2026-10-15 | GPT-6 (SECURITY-03C HTTP shared guard) | main | active | Add shared per-IP HTTP abuse guard backed by existing PostgresRateLimiter; preserve webhook, health and emergency priority bypass; tests and CI | Verify fail-closed behavior, update docs; no deployment without MIMT DB/telecom readiness
 
 - 2026-10-15 | GPT-6 (TEL-01 readiness) | main | done (code/test only; schema production pending) | /readyz via PostgresRepository.ping now requires 24 MIMT tables with RLS enabled, tests on isolated PostgreSQL for missing schema and disabled RLS; CI #38776170530 green at 5c30e035 | Next: provision isolated MIMT Supabase, apply and audit all migrations, configure secrets, check live /readyz; do not enable CD before real evidence
