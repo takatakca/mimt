@@ -41,7 +41,7 @@ const SIGNED_WEBHOOK_PATHS = new Set([
 
 /** Emergency setup and carrier callbacks must not depend on the abuse bucket service. */
 function bypassSharedHttpLimit(url: string): boolean {
-  const path = url.split("?")[0];
+  const path = url.split("?")[0] ?? "";
   return path === "/healthz" || path === "/readyz" ||
     path.startsWith("/v1/e911/") || SIGNED_WEBHOOK_PATHS.has(path);
 }
@@ -63,7 +63,7 @@ export async function buildApp(deps: AppDeps) {
     max: 300,
     timeWindow: "1 minute",
     // Only actual signed provider callback URLs bypass the local limiter.
-    allowList: (req) => SIGNED_WEBHOOK_PATHS.has(req.url.split("?")[0]),
+    allowList: (req) => SIGNED_WEBHOOK_PATHS.has(req.url.split("?")[0] ?? ""),
   });
 
   // Supplemental shared per-IP limit: @fastify/rate-limit retains route-specific
