@@ -1,5 +1,17 @@
 # MIMT — Relève automatique d'agent
 
+## Relève du 15 octobre 2026 — TEL-01 schéma & RLS comme condition de disponibilité
+
+- **Dernière tâche terminée :** `PostgresRepository.ping()` impose désormais les 24 tables critiques de la base télécom MIMT avec RLS activé avant que `GET /readyz` rende un état DB prêt; plus de simple `SELECT 1`. Tests avec Postgres 16 isolé : table absente, métadonnées complètes, puis RLS désactivé. Aucun contenu client réel ni connexion à un autre produit.
+- **Dernier commit technique poussé :** `5c30e0351889ae8ff8464e9b0480808e200a9d70` ; [CI GitHub #38776170530](https://github.com/takatakca/mimt/actions/runs/38776170530) **réussie**. Les modifications du commit sont `apps/api/src/repo/postgres.ts`, `apps/api/test/postgres-rate-limiter.test.ts` ; `WORKLOG.md` revendique et ferme TEL-01. La présente mise à jour documentaire fera avancer HEAD : vérifier `main` et sa CI en reprise.
+- **Vérifications réalisées :** état initial `main` `e5cbe7bf` avec CI verte, branches/commits, aucune PR/issue ouverte; tests PostgreSQL en CI `38776170530` et suite TypeScript/Web. Les URL `mimt.ca/deploy-version.txt`, `api.mimt.ca/healthz` et `api.mimt.ca/readyz` n'ont pas pu être confirmées accessibles depuis l'outil web.
+- **Déploiement :** aucun nouveau SHA démontré en production, CD API/Web `skipped`. Les bases Supabase connectées consultées sont toujours au nombre de cinq **sans projet MIMT identifiable**. Migration de buckets HMAC non appliquée en production, secret HMAC non installé, pas d'essai Twilio/9-1-1.
+- **Problèmes connus :** vérification de structure/RLS ne remplace pas un test des politiques par rôles `anon`/`authenticated`, ni un test réel de tout le schéma; tests positifs utilisent des tables factices uniquement dans la base CI éphémère. Global HTTP rate-limit Fastify et tâches outbox restent locaux. Consentement WEB-02 toujours attribué à un autre agent tant qu'il est actif dans WORKLOG.
+- **Prochaine action exacte :** lire SHA et CI de main, identifier/créer le projet Supabase MIMT dédié Canada avec approbation des coûts, appliquer les migrations `0001`–`0004` et `20261015173000` dans la bonne base, contrôler l'absence d'accès direct aux tables sensibles, configurer le HMAC privé, puis vérifier `readyz` et version réellement déployée. Si ces accès sont absents, avancer la centralisation du rate-limit HTTP Fastify et la coordination de l'outbox en code sans toucher au 9-1-1.
+
+---
+
+
 ## Relève du 15 octobre 2026 — SECURITY-03B (tests SQL validés)
 
 - **Dépôt / main initial :** `takatakca/mimt`, SHA `e5cbe7bfadfe68e9e5c4400f39b25ebf16071e25` ; CI initiale `38734604699` verte; aucune PR/issue ouverte, CD ignoré. Tâche WEB-02 déjà active par un autre agent, non touchée.

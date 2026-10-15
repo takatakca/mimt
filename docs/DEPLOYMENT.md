@@ -87,3 +87,9 @@ Les gates Web `MIMT_WEB_DEPLOY_ENABLED` et `MIMT_WEB_PARITY_REVIEWED` ainsi que 
 **Entretien :** après configuration de l'API réelle et autorisation des tâches planifiées Coolify, exécuter par exemple une fois par jour `node apps/api/dist/jobs/pruneRateBuckets.js` (ou `pnpm --filter @mimt/api job:prune-rate-limits` depuis le dépôt avec build). La purge ne supprime que les clés inactives depuis leur fenêtre entière plus une heure; ne pas ouvrir d'accès public à la table.
 
 **Interdiction d'autoscaling :** les limites métier sont partagées, mais le plugin HTTP `@fastify/rate-limit` et l'outbox/pollers restent locaux. Ne pas mettre plusieurs réplicas en production sans tests et synchronisation globale. Le 9-1-1 est hors quotas anti-abus ordinaires et reste une obligation de vérification opérateur.
+
+## Protection `/readyz` avant bascule (15 octobre 2026)
+
+L'API liée à PostgreSQL n'indique désormais `db: up` qu'avec **24 tables MIMT** reconnues et la RLS activée pour chacune; absence de migration ou RLS désactivée => réponse `503`. Cela couvre `0001`–`0004` et `20261015173000_shared_rate_limit_buckets.sql`. La CI [38776170530](https://github.com/takatakca/mimt/actions/runs/38776170530) prouve le comportement sur une base **isolée** mais n'exécute pas les migrations commerciales. Vérifier également les vraies politiques RLS au moyen des rôles d'essai avant d'activer un hébergement réel; `readyz` seul ne démontre pas leur correction.
+
+Les URL publiques `https://mimt.ca/deploy-version.txt`, `https://api.mimt.ca/healthz` et `https://api.mimt.ca/readyz` n'étaient pas récupérables dans la vérification web de cette session. Ne jamais présumer que le SHA GitHub est déployé.

@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-15 | GPT-6 (TEL-01 readiness) | main | active | Verify complete MIMT DB schema and RLS for /readyz, not just SELECT 1; add isolated PostgreSQL regression | Validate CI and update five handoff docs, keep production gates closed
+- 2026-10-15 | GPT-6 (TEL-01 readiness) | main | done (code/test only; schema production pending) | /readyz via PostgresRepository.ping now requires 24 MIMT tables with RLS enabled, tests on isolated PostgreSQL for missing schema and disabled RLS; CI #38776170530 green at 5c30e035 | Next: provision isolated MIMT Supabase, apply and audit all migrations, configure secrets, check live /readyz; do not enable CD before real evidence
 
 - 2026-10-15 | GPT-6 (SECURITY-03B shared limiter) | main | done (code/CI; DB production pending) | Added transactional PostgreSQL shared buckets, HMAC-SHA256 private keys, fail-closed DB outage handling, migration + isolated PostgreSQL 16 CI concurrency tests and safe expiry pruning; full CI #38775431115 successful at e5079982 | Next: provision independent MIMT Supabase, apply/review migration, configure RATE_LIMIT_HMAC_KEY; Fastify IP limiter and other jobs still not distributed; keep CD disabled
 

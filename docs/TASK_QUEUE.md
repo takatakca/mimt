@@ -59,3 +59,6 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 - **SECURITY-03B-PROD : bloqué** — créer/identifier la base Supabase MIMT distincte, revoir puis appliquer la migration privée après les migrations historiques, fournir `RATE_LIMIT_HMAC_KEY` en coffre-fort, vérifier santé et comportement de refus. **Pas de preuve de production**.
 - **SECURITY-03C : à faire** — le rate-limit global Fastify par IP (`@fastify/rate-limit`) et l'outbox/pollers sont encore par processus. Intégration distribuée et tests de concurrence supplémentaires requis avant autoscaling.
 - **WEB-02 : ne pas modifier en doublon** — une ligne du WORKLOG reste `active` pour un autre agent; la séparation TAKATAK/MIMT, LCAP, données privées et l'obligation 9-1-1 demeurent applicables.
+
+- **TEL-01-SCHEMA — fait dans le dépôt, pas en production (15 octobre 2026)** : `/readyz` refuse une base partiellement migrée ou avec RLS désactivé; 24 tables requises, tests SQL isolés et CI `38776170530` verte. **TEL-01 déploiement** reste bloqué par base MIMT indépendante, migration appliquée, secrets et vérification de la santé réelle.
+- **SECURITY-01 — reste à effectuer en environnement MIMT réel** : tests des permissions `anon` / `authenticated`, restrictions de service et RLS par entreprise, pas seulement la présence du drapeau RLS.

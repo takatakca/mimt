@@ -77,3 +77,9 @@ Correctif proposé : `data-href` n'est pas un lien, `data-id` n'est pas une cibl
 - **Base en ligne :** liste actuelle Supabase interrogée : aucun projet nommé MIMT parmi les cinq accessibles. **Aucune migration appliquée** à un projet client. Le besoin de créer/identifier MIMT dédié Canada demeure.
 - **Risque résiduel :** le plugin Fastify de quota global IP conserve un état par processus; les jobs/outbox ne sont pas prêts pour plusieurs replicas. La migration est un prérequis du nouveau binaire API, faute de quoi les requêtes limitées seront refusées. Aucun 9-1-1 réel testé.
 - **Déploiements :** workflows SSH Web et API Coolify encore `skipped`. Le site et l'API publics ne peuvent pas être déclarés synchronisés au SHA GitHub.
+
+## Statut de santé amélioré — 15 octobre 2026
+
+- `GET /readyz` ne se contente plus de `SELECT 1` : la connexion Postgres doit exposer les **24 tables de toutes les migrations MIMT**, chacune avec `relrowsecurity` actif, faute de quoi la disponibilité est refusée. Commit code `5c30e0351889ae8ff8464e9b0480808e200a9d70`, [CI #38776170530](https://github.com/takatakca/mimt/actions/runs/38776170530) réussie, incluant tests de métadonnées RLS sur Postgres 16 CI.
+- **Limites confirmées :** ces tests utilisent des tables de structure factices dans une base CI isolée et ne remplacent pas des migrations réelles, le contrôle des politiques `anon`/`authenticated` ou le test de `readyz` en production. Les services publics de health/version n'étaient pas récupérables par l'outil Web.
+- **Production :** CD encore `skipped`; 5 projets Supabase accessibles, aucun MIMT identifié; lancement télécom et conformité 9-1-1 toujours en attente.
