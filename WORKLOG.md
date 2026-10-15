@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-15 | GPT-6 (SECURITY-03A bounded buckets) | main | active | Bound memory used by token buckets, reject invalid inputs and protect limits under key-flood pressure; add deterministic tests | Verify CI, document remaining distributed-store requirement
+- 2026-10-15 | GPT-6 (SECURITY-03A bounded buckets) | main | done (distributed deployment pending) | Capped in-memory token buckets to 50,000 active keys with fail-closed overflow, idle bucket sweeping, clock rollback handling and invalid input guards; 3 regression tests; full CI #38734095766 green at 4d0f81c6 | Next: implement atomic shared limiter before scaling beyond one API instance, no effect on 9-1-1 override
 
 - 2026-10-14 | GPT-6 (WEB-04 link attribute audit) | agent/web04-link-attributes-20261014-3 → PR pending | done (local 7/7; full CI pending) | Fixed false-positive data-href/data-id in static link audit, 3 regression tests; separate from WEB-02 and 9-1-1 | Open PR, verify full CI, merge only if green; no deployment
 

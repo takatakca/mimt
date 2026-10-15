@@ -61,3 +61,11 @@ Reprise externe programmée chaque heure le 2026-10-14, intitulée « MIMT — R
 ## WEB-04 — attributs HTML (branche isolée, 2026-10-14)
 
 Correctif proposé : `data-href` n'est pas un lien, `data-id` n'est pas une cible de fragment. Trois nouveaux tests, suite Node locale **7/7**; CI complète de branche en attente. Base `main` `c95f1cde`, [CI 38632496153](https://github.com/takatakca/mimt/actions/runs/38632496153) réussie; CD Web/API `skipped`. Aucun nouveau déploiement ni migration; parité visuelle EN et formulaire/API avec base MIMT séparée toujours ouverts.
+
+## Contrôle du 15 octobre 2026 — SECURITY-03A
+
+- `main` démarrait à `06817d3a53fa77f47549378e37861f8c8249bd69`, [CI #38647530229](https://github.com/takatakca/mimt/actions/runs/38647530229) **réussie**. Les workflows de déploiement API et Web étaient `skipped`.
+- Incrément `SECURITY-03A` : limiteur token-bucket mémoire borné à **50 000 clés actives** (déni par défaut lorsque plein plutôt qu'éviction des clés actives), nettoyage des clés inactives, horloge décroissante et règles invalides contrôlées. Trois nouveaux tests dans `apps/api/test/fraud.test.ts`.
+- Code poussé au SHA `4d0f81c6c32fa51712ff323cfe5af800a3c6d5ef`, [CI #38734095766](https://github.com/takatakca/mimt/actions/runs/38734095766) **réussie**. La rédaction de cette relève ajoute un commit documentaire sur main, dont la CI doit être consultée après push.
+- **Non résolu** : plafonds toujours indépendants entre les instances. La production multi-réplica n'est **pas autorisée** avant limitation distribuée et essais concurrentiels. Les appels d'urgence 9-1-1 conservent leur exception explicite; aucun test fournisseur réel réalisé.
+- **Production** : aucune preuve de SHA servi ni de déploiement API, Web, base ou téléphonie. Blocages antérieurs inchangés.

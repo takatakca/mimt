@@ -67,3 +67,11 @@ Le script `node apps/web/scripts/check-export.mjs` valide toutes les 28 routes s
 ## WEB-04 — vérificateur de liens (2026-10-14)
 
 Le validateur HTML doit distinguer les vrais attributs `href` et `id` de `data-href` et `data-id`. Trois tests supplémentaires passent localement (7/7), **sans preuve de CI complète ou de publication**. `main` `c95f1cde` : [CI 38632496153](https://github.com/takatakca/mimt/actions/runs/38632496153) réussie; CD Web et API `skipped`. Maintenir les drapeaux, secrets, serveur, sauvegardes, SHA servi, base MIMT indépendante et obligations 9-1-1 comme prérequis absolus.
+
+## Gate anti-abus — 15 octobre 2026
+
+La nouvelle implémentation `InMemoryRateLimiter` impose un plafond de 50 000 clés actives par processus et refuse les clés supplémentaires lorsque cette capacité est atteinte, sans remettre à zéro les limites existantes. La CI `38734095766` est réussie sur le commit `4d0f81c6`.
+
+**Important :** les limites demeurent indépendantes entre les réplicas Fastify. Ne pas configurer la production MIMT en plusieurs réplicas, autoscaling ou plusieurs instances d'API tant qu'un limiter atomique **partagé** n'est pas implémenté, testé sous concurrence et surveillé. Une saturation peut refuser les demandes non urgentes; monitorer les taux 429 et les volumes de clés distinctes. Ce contrôle ne doit jamais être appelé dans le chemin prioritaire du 9-1-1.
+
+Les gates Web `MIMT_WEB_DEPLOY_ENABLED` et `MIMT_WEB_PARITY_REVIEWED` ainsi que la ressource API `MIMT_API_DEPLOY_ENABLED` demeurent fermés en l'absence d'infrastructure MIMT confirmée, d'approbations et de preuve SHA live.

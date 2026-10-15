@@ -1,5 +1,19 @@
 # MIMT — Relève automatique d'agent
 
+## Session du 15 octobre 2026 — SECURITY-03A : limiteur mémoire borné
+
+- **HEAD vérifié au démarrage :** `06817d3a53fa77f47549378e37861f8c8249bd69` sur `main`; CI [#38647530229](https://github.com/takatakca/mimt/actions/runs/38647530229) réussie, CD API et Web `skipped`. Aucun PR ni issue ouverts. WEB-02 (consentement) était `active` dans `WORKLOG.md`; aucun de ses fichiers n'a été touché.
+- **Dernière tâche terminée / code poussé :** `SECURITY-03A` au SHA `4d0f81c6c32fa51712ff323cfe5af800a3c6d5ef`; `InMemoryRateLimiter` avec 50 000 entrées max, rejet des clés nouvelles si saturé, purge seulement de buckets inactifs et pleinement remplis, protections contre horloge reculant et règles invalides. Trois tests ajoutés au dossier fraude.
+- **Vérifications :** revue GitHub du code et des utilisations des limiteurs, contrôle des chemins d'appels 9-1-1 ; GitHub Actions CI [#38734095766](https://github.com/takatakca/mimt/actions/runs/38734095766) **réussie** (typecheck, tests, build et export). Le 9-1-1 n'utilise pas les limites d'appels ordinaires avant son traitement dédié; aucune simulation d'appel réel réalisée.
+- **Fichiers modifiés :** `WORKLOG.md`, `apps/api/src/fraud/rateLimiter.ts`, `apps/api/test/fraud.test.ts`, et les cinq documents de relève. Le commit documentaire de cette session fera avancer `main`; toujours relire le HEAD au début de la prochaine session.
+- **État déploiement réel :** aucun nouveau SHA prouvé sur `mimt.ca` ou `api.mimt.ca`. Les dernières exécutions CD consultées sont `skipped`, aucun SSH/Coolify MIMT, projet Supabase MIMT ou essai Twilio validé.
+- **Problèmes connus :** ce limiteur reste **par processus** et fail-closed sous forte pression de clés distinctes; plusieurs réplicas peuvent contourner globalement les plafonds. **Ne pas lancer plusieurs réplicas** avant d'installer et tester un magasin partagé atomique. Les formulaires WEB-02 sont pris en charge par un autre agent. Les autorisations réglementaires, 9-1-1, secrets, nom du responsable des données, contrats restent non vérifiés.
+- **Accès nécessaires :** serveur/hôte SSH contrôlé et marqueur Web, espace backups, instance Coolify MIMT, projet Postgres MIMT dédié Canada avec migrations/RLS, secrets IdP/Twilio/Stripe et revue 9-1-1. Ne pas emprunter des bases TAKATAK.
+- **Prochaine action exacte :** lire HEAD et CI, vérifier les modifications du propriétaire WEB-02, puis traiter `SECURITY-03B` en préparant un mécanisme de limitation atomique partagé (SQL/Redis dans un projet MIMT dédié) avec tests de concurrence sans activer la production; ou avancer la parité visuelle WEB-01 en environnement autorisé. Continuer la documentation et les contrôles avant CD.
+
+---
+
+
 ## WEB-04 — reprise du 14 octobre 2026 (branche isolée)
 
 - Base vérifiée : `main` `c95f1cde0e2253cfbedff13e0bd953039ffd663c`, CI [38632496153](https://github.com/takatakca/mimt/actions/runs/38632496153) réussie; CD Web et API ignorés (`skipped`). Aucun PR/issue ouvert au début de la reprise.

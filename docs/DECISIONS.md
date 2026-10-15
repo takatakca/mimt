@@ -37,3 +37,7 @@ Mise à jour : 2026-10-14. Distinguer décisions approuvées, orientations de co
 - **D-14 / Proxys :** ne faire confiance à `X-Forwarded-For` que lorsque l'adresse IP immédiate est dans `TRUSTED_PROXY_CIDRS`. Aucun proxy fiable par défaut; ne pas autoriser tous les réseaux. Justification : empêcher les clients non fiables de contourner les limites IP en forgeant des en-têtes. Code `apps/api/src/app.ts`, `config.ts`; CI `38626239265` réussie.
 - **D-15 / Liens :** refuser la publication d'un export Web comprenant des liens internes manquants ou des ancres invalides; vérifier les deux langues. Code `apps/web/scripts/check-links.mjs`; CI `38625918929` réussie.
 - **Décision ouverte :** sélectionner les IP du proxy réel et une limitation de requêtes centralisée avant l'usage multi-instance. Ne jamais confondre contrôle de qualité du site statique et essai télécom réel.
+
+## D-16 — Limiteur mémoire à capacité bornée (15 octobre 2026)
+
+Il est interdit d'évincer une clé encore active pour accueillir de nouvelles clés de requêtes : cela effacerait son quota de sécurité. Le limiteur mono-processus purge seulement les entrées inactives dont la fenêtre de recharge est écoulée, puis **refuse** les nouvelles clés si les 50 000 emplacements sont occupés; les règles invalides et retours d'horloge ne donnent aucun jeton. Les règles anti-abus du 9-1-1 sont exclues de son chemin prioritaire. Ce mécanisme limite l'empreinte mémoire mais ne remplace pas un compteur partagé pour plusieurs instances. `apps/api/src/fraud/rateLimiter.ts`, CI `38734095766`.

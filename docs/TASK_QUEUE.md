@@ -46,3 +46,9 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 - Les déploiements Web et API sont restés **skipped**. Priorité de suite : intégrations vérifiées et parité avant activation des flags.
 
 - 2026-10-14 — `WEB-04-LINK-ATTRS` (branche isolée) : correctif des faux positifs `data-href` et `data-id`; trois tests de régression, suite Node locale 7/7. **CI complète de PR à vérifier** avant intégration. Ne pas toucher au consentement WEB-02 actif. Parité visuelle EN et projet/API MIMT restent bloqués par validations et accès.
+
+## Avancement du 15 octobre 2026
+
+- **SECURITY-03A — fait côté code, CI réussie** : token-bucket mémoire borné à 50 000 clés, purge des seules clés inactives, refus de nouvelles clés en cas de saturation, tests de refus/recul d'horloge/règles invalides. Commit `4d0f81c6`, CI `38734095766` verte.
+- **SECURITY-03B — À FAIRE** : limitation atomique partagée et stockage fiable MIMT pour les règles anti-abus (OTP, SMS, appels ordinaires et leads) en contexte multi-instance, tests de simultanéité et de panne de base. Ne pas bloquer les appels d'urgence, même si le magasin partagé est indisponible. Ne pas déclarer multi-instance sécurisé sans preuves.
+- **WEB-02 — autre agent actif** selon `WORKLOG.md` : ne pas modifier les fichiers de consentement en parallèle. Ne pas activer le formulaire en production avant que l'API et la base dédiée soient vérifiées.
