@@ -4,6 +4,7 @@ import type { AppDeps } from "./deps.js";
 import { loadSigningKey, SessionService } from "./auth/sessions.js";
 import { TakatakOidc } from "./auth/takatak.js";
 import { InMemoryRateLimiter } from "./fraud/rateLimiter.js";
+import { PostgresRateLimiter } from "./fraud/postgresRateLimiter.js";
 import { admobKeyLoader } from "./ads/ssv.js";
 import { createDeviceVerifier } from "./devices/verify.js";
 import { StripeGateway } from "./gateways/billing.js";
@@ -56,7 +57,9 @@ export function createDeps(config: Config, log: Logger): AppDeps {
     deviceVerifier: createDeviceVerifier(config),
     admobKeys: admobKeyLoader(config.ADMOB_SSV_KEYS_URL),
     cipher: new MessageCipher(cipherKey),
-    rateLimiter: new InMemoryRateLimiter(),
+    rateLimiter: repo instanceof PostgresRepository
+      ? new PostgresRateLimiter(repo.sql, () => log.warn("shared rate limit storage unavailable; deny non-emergency requests"))
+      : new InMemoryRateLimiter(),
     notifier: new LogNotifier(log),
     now: () => new Date(),
   };

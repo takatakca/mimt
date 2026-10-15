@@ -6,12 +6,13 @@
 - `migrations/0002_push_tokens.sql` : jetons de notification des appareils (APNs/FCM) par utilisateur et plateforme, RLS lecture de ses propres lignes.
 - `migrations/0003_devices_rewards.sql` : appareils attestés et récompenses publicitaires. Aucune politique de lecture (rôle service seulement).
 - `migrations/0004_public_leads.sql` : demandes des visiteurs du site, avec RLS et refus d'accès direct pour `anon` et `authenticated`.
+- `migrations/20261015173000_shared_rate_limit_buckets.sql` : buckets de limitation anti-abus partagés; clés hachées et table privée avec RLS (aucune politique pour les clients).
 - Bucket Storage privé `voicemail` (à créer dans le projet Supabase, pas public). L'API y copie les messages vocaux quand `SUPABASE_URL` et la clé service sont dans l'environnement.
 - RLS est activé sur **toutes** les tables. Le rôle `anon` n'a aucun accès. Les utilisateurs `authenticated` peuvent seulement **lire** leurs propres lignes (via `users.auth_user_id = auth.uid()`). Les tables sensibles (jetons, handoff, fraude, outbox, audit, désabonnements) n'ont aucune politique : refus total sauf pour le rôle service.
 - L'API se connecte avec la chaîne de connexion directe / service role (`DATABASE_URL`) et contourne RLS ; elle applique elle-même les règles d'accès.
 - Les corps de messages sont chiffrés par l'API (AES-256-GCM) avant l'insertion ; la base ne voit jamais le texte en clair.
 
-Appliquer : `supabase db push` (CLI liée au projet) ou `psql "$DATABASE_URL" -f migrations/0001_init.sql -f migrations/0002_push_tokens.sql -f migrations/0003_devices_rewards.sql -f migrations/0004_public_leads.sql` (dans l'ordre).
+Appliquer : `supabase db push` (CLI liée au projet) ou `psql "$DATABASE_URL" -f migrations/0001_init.sql -f migrations/0002_push_tokens.sql -f migrations/0003_devices_rewards.sql -f migrations/0004_public_leads.sql -f migrations/20261015173000_shared_rate_limit_buckets.sql` (dans l'ordre).
 
 **EN —** Postgres schema for the MIMT API, in a Supabase project **separate from TAKATAK** (`ca-central-1`).
 
@@ -21,3 +22,5 @@ Appliquer : `supabase db push` (CLI liée au projet) ou `psql "$DATABASE_URL" -f
 - Local check without Supabase: create roles `anon`, `authenticated`, `service_role` and a stub `auth.uid()` function first (see `apps/api/README.md`, "Tests against Postgres").
 
 **Attention CLI :** les migrations historiques du dépôt sont préfixées `0001`–`0004` plutôt qu'avec un timestamp de 14 chiffres. Utiliser le chemin SQL explicite `psql -f ...` avec contrôle de schéma avant toute bascule, ou vérifier/normaliser le format auprès du Supabase CLI courant; ne pas supposer qu'un `supabase db push` acceptera automatiquement ces anciennes versions. Pour toute migration future, utiliser `supabase migration new <nom>` puis contrôler l'historique des migrations.
+
+**Sécurité de montée en charge :** la migration du limiteur partagé doit être appliquée **avant** le déploiement de la nouvelle API. Les quotas métier OTP/SMS/appels sortants/leads sont alors synchronisés par verrouillage SQL transactionnel sur la clé hachée. Les limites du plugin Fastify par IP demeurent par instance, ainsi que certains jobs; ne pas déclarer une mise à l'échelle multi-réplica prête avant vérification de ces autres dépendances. Nettoyer les buckets expirés par la requête commentée dans la migration, via job DB autorisé. Aucune table ne doit être déployée dans la base TAKATAK.
