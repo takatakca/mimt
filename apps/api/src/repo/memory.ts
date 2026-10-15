@@ -510,16 +510,28 @@ export class MemoryRepository implements Repository {
       .slice(0, limit)
       .map(clone);
   }
+  async claimDueOutbox(now: Date, limit: number, leaseMs = 120_000) {
+    if (!Number.isFinite(now.getTime()) || !Number.isSafeInteger(limit) || limit < 1 ||
+        !Number.isSafeInteger(leaseMs) || leaseMs < 30_000) throw new Error("Invalid outbox lease");
+    const available = this.outbox
+      .filter((e) => !e.deliveredAt && e.nextAttemptAt && e.nextAttemptAt <= now)
+      .sort((a, b) => a.nextAttemptAt!.getTime() - b.nextAttemptAt!.getTime())
+      .slice(0, limit);
+    const until = new Date(now.getTime() + leaseMs);
+    // No await between claim and lease update; other workers cannot claim it.
+    for (const row of available) row.nextAttemptAt = until;
+    return available.map(clone);
+  }
   async markOutboxDelivered(id: string, at: Date) {
     const e = this.outbox.find((x) => x.id === id);
-    if (e) {
+    if (e && !e.deliveredAt) {
       e.deliveredAt = at;
       e.attempts++;
     }
   }
   async markOutboxFailed(id: string, error: string, nextAttemptAt: Date | null) {
     const e = this.outbox.find((x) => x.id === id);
-    if (e) {
+    if (e && !e.deliveredAt) {
       e.attempts++;
       e.lastError = error;
       e.nextAttemptAt = nextAttemptAt;

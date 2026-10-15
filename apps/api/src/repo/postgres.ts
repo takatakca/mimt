@@ -430,11 +430,31 @@ export class PostgresRepository implements Repository {
     return (await this.sql`select * from takatak_outbox where delivered_at is null and next_attempt_at <= ${now}
       order by next_attempt_at limit ${limit}`) as unknown as OutboxEvent[];
   }
+  async claimDueOutbox(now: Date, limit: number, leaseMs = 120_000) {
+    if (!Number.isFinite(now.getTime()) || !Number.isSafeInteger(limit) || limit < 1 ||
+        !Number.isSafeInteger(leaseMs) || leaseMs < 30_000) throw new Error("Invalid outbox lease");
+    const until = new Date(now.getTime() + leaseMs);
+    // Single atomic statement selects disjoint due rows across API replicas.
+    // Crashed claims can be picked up again after the lease expires.
+    return (await this.sql`
+      with candidate as (
+        select id from takatak_outbox
+        where delivered_at is null and next_attempt_at <= ${now}
+        order by next_attempt_at, created_at
+        limit ${limit}
+        for update skip locked
+      )
+      update takatak_outbox as o
+      set next_attempt_at = ${until}
+      from candidate where o.id = candidate.id
+      returning o.*
+    `) as unknown as OutboxEvent[];
+  }
   async markOutboxDelivered(id: string, at: Date) {
-    await this.sql`update takatak_outbox set delivered_at = ${at}, attempts = attempts + 1 where id = ${id}`;
+    await this.sql`update takatak_outbox set delivered_at = ${at}, attempts = attempts + 1 where id = ${id} and delivered_at is null`;
   }
   async markOutboxFailed(id: string, error: string, nextAttemptAt: Date | null) {
-    await this.sql`update takatak_outbox set attempts = attempts + 1, last_error = ${error}, next_attempt_at = ${nextAttemptAt} where id = ${id}`;
+    await this.sql`update takatak_outbox set attempts = attempts + 1, last_error = ${error}, next_attempt_at = ${nextAttemptAt} where id = ${id} and delivered_at is null`;
   }
 
   async audit(e: AuditEntry) {

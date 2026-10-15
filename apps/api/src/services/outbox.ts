@@ -5,7 +5,7 @@ import type { Repository } from "../repo/types.js";
 
 const MAX_ATTEMPTS = 10;
 
-/** Delivers pending TAKATAK webhooks. Exponential backoff (30 s → ~4 h), dead-letter after 10 attempts. */
+/** Leased, at-least-once TAKATAK webhooks; receiver must deduplicate on event id. */
 export async function deliverOutbox(input: {
   repo: Repository;
   config: Config;
@@ -21,7 +21,8 @@ export async function deliverOutbox(input: {
   const doFetch = input.fetchImpl ?? fetch;
   let delivered = 0;
   let failed = 0;
-  for (const ev of await repo.listDueOutbox(now, 50)) {
+  // Five sequential 10s requests complete before a 120s lease expires.
+  for (const ev of await repo.claimDueOutbox(now, 5, 120_000)) {
     const body = JSON.stringify({ id: ev.id, type: ev.eventType, created_at: ev.createdAt.toISOString(), data: ev.payload });
     try {
       const res = await doFetch(url, {
