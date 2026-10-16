@@ -184,3 +184,11 @@
 3. En cas d'échec, examiner le job et son log, corriger au plus petit diff, relancer CI et consigner le SHA.
 4. Sinon continuer `WEB-02` : identifier/créer un projet Supabase MIMT **séparé et autorisé**, appliquer les migrations, déployer l'API via le CD Coolify, vérifier un vrai POST et la RLS, puis activer la variable `MIMT_WEB_FORMS_ENDPOINT`. Sans accès, poursuivre `WEB-01` (parité du site public).
 5. **Ne pas** activer la publication destructive ou annoncer le télécom lancé sans vérification de la cible et des exigences 9-1-1.
+
+
+## WEB-01 EN SEO — 16 octobre 2026 (branche isolée)
+
+- Vérification initiale : `main` 855aa1700bebb3f428993d6430768bc1b326d584 ; CI [#38883358108](https://github.com/takatakca/mimt/actions/runs/38883358108) réussie ; CI documentaire [#38883162397](https://github.com/takatakca/mimt/actions/runs/38883162397) réussie. Aucune PR/issue ouverte au début ; `WEB-02` reste active chez un autre agent.
+- Incrément indépendant : audit déterministe des balises `canonical` et `hreflang` FR/EN/x-default sur les 28 pages exportées, avec cinq tests Node isolés. Fichiers : `apps/web/scripts/check-alternates.mjs`, `.test.mjs`, `check-export.mjs` et `.github/workflows/ci.yml`. Les cinq tests ont réussi localement avec Node 22 ; CI complète de la PR à vérifier après push.
+- Aucun changement aux formulaires/consentements WEB-02, à l'identité TAKATAK, à la base MIMT, aux quotas ni au 9-1-1. **Aucun déploiement** ; Web/API restent protégés et les approbations juridiques, le SHA live, les sauvegardes, les secrets et la base MIMT indépendante sont toujours requis.
+- Prochaine action : vérifier la CI de cette branche/PR et ses logs, corriger si nécessaire ; demander la revue de parité visuelle EN et des engagements commerciaux avant d'activer `MIMT_WEB_PARITY_REVIEWED`. Ne pas fusionner automatiquement sans CI verte.

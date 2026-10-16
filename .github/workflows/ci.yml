@@ -57,6 +57,8 @@ jobs:
         run: node apps/web/scripts/check-export.mjs
       - name: Check static link checker unit tests
         run: node --test apps/web/scripts/check-links.test.mjs
+      - name: Test bilingual canonical and hreflang audit
+        run: node --test apps/web/scripts/check-alternates.test.mjs
       - name: Check links and anchor targets on exported pages
         run: node apps/web/scripts/check-links.mjs
       - name: Publish static website artifact

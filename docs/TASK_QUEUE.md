@@ -77,3 +77,11 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 - Les tâches bloquées `WEB-01/WEB-02/TEL-00/TEL-01/TEL-02/SECURITY-01` restent ouvertes; ne pas activer des drapeaux de publication sans preuve.
 
 **Confirmation complémentaire — 16 octobre 2026 :** CI du code optimisé `9305b270` : [#38882978609](https://github.com/takatakca/mimt/actions/runs/38882978609) **réussie**. CI de la relève `16aee1b5` : [#38883162397](https://github.com/takatakca/mimt/actions/runs/38883162397) **réussie**. La tâche horaire autorisée « MIMT — Reprise GitHub » a été réactivée, sans permission supplémentaire de déployer. Cette confirmation produit un nouveau commit documentaire, dont il faut revérifier le SHA/CI après push. API/Web toujours `skipped`; aucune mise en production confirmée.
+
+
+## WEB-01 EN SEO — 16 octobre 2026 (branche isolée)
+
+- Vérification initiale : `main` 855aa1700bebb3f428993d6430768bc1b326d584 ; CI [#38883358108](https://github.com/takatakca/mimt/actions/runs/38883358108) réussie ; CI documentaire [#38883162397](https://github.com/takatakca/mimt/actions/runs/38883162397) réussie. Aucune PR/issue ouverte au début ; `WEB-02` reste active chez un autre agent.
+- Incrément indépendant : audit déterministe des balises `canonical` et `hreflang` FR/EN/x-default sur les 28 pages exportées, avec cinq tests Node isolés. Fichiers : `apps/web/scripts/check-alternates.mjs`, `.test.mjs`, `check-export.mjs` et `.github/workflows/ci.yml`. Les cinq tests ont réussi localement avec Node 22 ; CI complète de la PR à vérifier après push.
+- Aucun changement aux formulaires/consentements WEB-02, à l'identité TAKATAK, à la base MIMT, aux quotas ni au 9-1-1. **Aucun déploiement** ; Web/API restent protégés et les approbations juridiques, le SHA live, les sauvegardes, les secrets et la base MIMT indépendante sont toujours requis.
+- Prochaine action : vérifier la CI de cette branche/PR et ses logs, corriger si nécessaire ; demander la revue de parité visuelle EN et des engagements commerciaux avant d'activer `MIMT_WEB_PARITY_REVIEWED`. Ne pas fusionner automatiquement sans CI verte.

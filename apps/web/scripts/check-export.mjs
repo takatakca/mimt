@@ -3,14 +3,8 @@ import { fileURLToPath } from "node:url";
 import { join, dirname } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "out");
-const routes = [
-  ["", "en"], ["forfaits", "en/plans"], ["affaires", "en/business"],
-  ["ia", "en/ai"], ["comparer", "en/compare"], ["app-web", "en/web-app"],
-  ["bientot", "en/coming-soon"], ["9-1-1", "en/9-1-1"], ["aide", "en/help"],
-  ["plaintes", "en/complaints"], ["confidentialite", "en/privacy"],
-  ["conditions", "en/terms"], ["accessibilite", "en/accessibility"],
-  ["contact", "en/contact"],
-];
+import { ROUTE_PAIRS, checkAlternates } from "./check-alternates.mjs";
+const routes = ROUTE_PAIRS;
 
 let checked = 0;
 for (const [fr, en] of routes) {
@@ -58,3 +52,6 @@ for (const route of ["ia", "en/ai"]) {
 }
 console.log("MIMT release disclaimer and emergency-link checks passed.");
 console.log("MIMT static export validated: " + checked + " localized pages.");
+
+const alternateErrors = checkAlternates(root);
+if (alternateErrors.length) throw new Error("Bilingual SEO metadata:\n" + alternateErrors.join("\n"));
