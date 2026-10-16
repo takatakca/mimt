@@ -24,15 +24,22 @@ const heartbeatTimer = setInterval(() => {
 heartbeatTimer.unref();
 
 // Shared anti-abuse bucket cleanup: not on the request or 9-1-1 path.
-// Run on startup as well as hourly so short-lived containers still clean up.
-// Each invocation removes at most 1000 fully expired HMAC-only rows.
+// Run on startup and every five minutes so short-lived containers still clean up.
+// Each invocation removes at most 10000 fully expired HMAC-only rows.
 // Row locks + SKIP LOCKED make concurrent replicas safe.
 let rateBucketCleanupRunning = false;
 async function cleanRateBuckets() {
   if (rateBucketCleanupRunning || !(deps.repo instanceof PostgresRepository)) return;
   rateBucketCleanupRunning = true;
   try {
-    const removed = await pruneExpiredRateBuckets(deps.repo.sql, 1_000);
+    // Bound each pass to at most 10,000 rows and keep every transaction small.
+    // This catches up after restarts without one massive table-locking DELETE.
+    let removed = 0;
+    for (let batch = 0; batch < 10; batch++) {
+      const count = await pruneExpiredRateBuckets(deps.repo.sql, 1_000);
+      removed += count;
+      if (count < 1_000) break;
+    }
     if (removed) app.log.info({ removed }, "expired rate-limit buckets pruned");
   } catch {
     // Avoid writing database errors or query parameters to logs.
@@ -41,7 +48,7 @@ async function cleanRateBuckets() {
     rateBucketCleanupRunning = false;
   }
 }
-const rateBucketCleanupTimer = setInterval(() => { void cleanRateBuckets(); }, 60 * 60 * 1_000);
+const rateBucketCleanupTimer = setInterval(() => { void cleanRateBuckets(); }, 5 * 60 * 1_000);
 rateBucketCleanupTimer.unref();
 
 const costTimer = setInterval(() => {
