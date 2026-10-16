@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-16 | GPT-6 (OPS-02 rate bucket maintenance) | main | active | Bound PostgreSQL abuse-bucket pruning and schedule periodic maintenance; protect live quotas, concurrency and emergency paths | Add regression tests, verify CI, update five handoff docs; deploy remains gated
+
 - 2026-10-15 | GPT-6 (OPS-01 outbox lease) | main | done (code/CI) | PostgreSQL SKIP LOCKED atomic event claiming, 120s lease and 5-event batches, guarded delivered/failed mutations, crash retry + isolated Postgres integration concurrency tests; CI #38792255274 green at 35b693ac | TAKATAK consumer must deduplicate stable event IDs (at-least-once); no live deployment verified
 
 - 2026-10-15 | GPT-6 (SECURITY-03C HTTP shared guard) | main | done (code/CI) | Added shared 300/min per-client IP gate to HTTP routes, exact signed-webhook allowlist, exempt 9-1-1 setup and health, 4 tests; CI #38791371698 green at 356e5312 | Route-specific Fastify limits remain local; dedicated MIMT database and production evidence still missing
