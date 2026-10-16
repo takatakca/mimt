@@ -48,7 +48,8 @@ describe.skipIf(!dbUrl)("TAKATAK outbox atomic claim (isolated PostgreSQL)", () 
   it("recovers abandoned claims after the lease timeout", async () => {
     const ev = await a.enqueueOutbox("phone_number.assigned", { numberId: "test" });
     const now = new Date(Date.now() + 1000);
-    expect((await a.claimDueOutbox(now, 1)).map((x) => x.id)).toContain(ev.id);
+    const leased = await a.claimDueOutbox(now, 1);
+    expect(leased.map((x) => x.id)).toContain(ev.id);
     expect(await b.claimDueOutbox(new Date(now.getTime() + 60_000), 1)).toEqual([]);
     const retried = await b.claimDueOutbox(new Date(now.getTime() + 121_000), 1);
     expect(retried.map((x) => x.id)).toContain(ev.id);
