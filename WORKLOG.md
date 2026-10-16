@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-16 | GPT-6 (WEB-01 EN SEO audit) | agent/web01-en-seo-parity-20261016 → PR à vérifier | done (code/tests Node; CI PR pending; no deploy) | Audited reciprocal FR/EN canonical and hreflang for 28 exported pages; 5 isolated regression tests; no WEB-02 changes | Check PR CI and logs, then review live EN visual/editorial/legal parity; CD remains gated
+- 2026-10-16 | GPT-6 (WEB-01 EN SEO audit) | agent/web01-en-seo-parity-20261016 → PR à vérifier | blocked: PR creation refused by safety checks; code/tests Node 5/5, CI branch unavailable; no deploy | Audited reciprocal FR/EN canonical and hreflang for 28 exported pages; 5 isolated regression tests; no WEB-02 changes | Authorized maintainer: open PR from isolated branch to main to trigger full CI; then review live EN visual/editorial/legal parity; CD remains gated
 
 - 2026-10-16 | GPT-6 (OPS-02 rate bucket maintenance) | main | done (code/CI; production not deployed) | Bounded SQL cleanup with FOR UPDATE SKIP LOCKED, safe startup/5-minute scheduler at most 10 × 1000 rows, active quotas protected, isolated PostgreSQL batch/concurrency tests; CI #38882978609 success at 9305b270 and docs CI #38883162397 success at 16aee1b5 | Monitor buckets after isolated MIMT DB authorization; CD remains gated; hourly GitHub agent re-enabled
 
