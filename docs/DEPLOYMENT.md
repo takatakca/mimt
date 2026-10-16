@@ -110,3 +110,11 @@ L'API exécute automatiquement le nettoyage de `fraud_rate_buckets` après le d�
 - Les déploiements GitHub vers Web et Coolify restent inactifs; configuration de l'hébergeur, des secrets et validation légale/9-1-1 requises.
 
 **Confirmation complémentaire — 16 octobre 2026 :** CI du code optimisé `9305b270` : [#38882978609](https://github.com/takatakca/mimt/actions/runs/38882978609) **réussie**. CI de la relève `16aee1b5` : [#38883162397](https://github.com/takatakca/mimt/actions/runs/38883162397) **réussie**. La tâche horaire autorisée « MIMT — Reprise GitHub » a été réactivée, sans permission supplémentaire de déployer. Cette confirmation produit un nouveau commit documentaire, dont il faut revérifier le SHA/CI après push. API/Web toujours `skipped`; aucune mise en production confirmée.
+
+## Condition de sûreté de la file TAKATAK — 16 octobre 2026
+
+Depuis `2f4e8c5a`, chaque acquittement d'une sortie `takatak_outbox` exige l'échéance exacte (`next_attempt_at`) retournée par la prise atomique du bail. En cas de bail remplacé, l'écriture SQL ne modifie aucune ligne; les workers ignorent les retours périmés. Aucun changement de schéma ni variable supplémentaire nécessaire. **La sémantique est toujours at-least-once : le receveur TAKATAK doit traiter `id` de manière idempotente**. Un webhook accepté par TAKATAK puis perdu pendant l'acquittement peut être renvoyé.
+
+- CI code [#38942191701](https://github.com/takatakca/mimt/actions/runs/38942191701) réussie.
+- API CD [#38942429824](https://github.com/takatakca/mimt/actions/runs/38942429824), Web CD [#38942429951](https://github.com/takatakca/mimt/actions/runs/38942429951) : **skipped**.
+- Garder les secrets de signature dans l'environnement et les garde-fous E911/copie Web intactes; exécuter le test de déduplication réel uniquement avec une instance MIMT et un receveur TAKATAK autorisés.

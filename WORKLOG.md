@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-16 | GPT-6 (OPS-03 outbox stale lease fencing) | main | active | Stop expired/outdated TAKATAK webhook workers overwriting the current claimant's delivery or retry via lease compare-and-swap; isolated PG race tests | Run CI, document and hand off, keep production gated
+- 2026-10-16 | GPT-6 (OPS-03 outbox stale lease fencing) | main | done (code/CI; production not deployed) | Added compare-and-swap on leased next_attempt_at for delivery/failure acknowledgements in Postgres + Memory; transport worker only counts confirmed acknowledgements; regression tests for stale lease after reclaim and repository contract; CI #38942191701 passed at 2f4e8c5a | Next: validate webhook event-id dedup in TAKATAK receiver; MIMT API/Web production still gated and skipped
 
 - 2026-10-16 | GPT-6 (OPS-02 rate bucket maintenance) | main | done (code/CI; production not deployed) | Bounded SQL cleanup with FOR UPDATE SKIP LOCKED, safe startup/5-minute scheduler at most 10 × 1000 rows, active quotas protected, isolated PostgreSQL batch/concurrency tests; CI #38882978609 success at 9305b270 and docs CI #38883162397 success at 16aee1b5 | Monitor buckets after isolated MIMT DB authorization; CD remains gated; hourly GitHub agent re-enabled
 

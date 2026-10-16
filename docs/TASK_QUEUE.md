@@ -77,3 +77,9 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 - Les tâches bloquées `WEB-01/WEB-02/TEL-00/TEL-01/TEL-02/SECURITY-01` restent ouvertes; ne pas activer des drapeaux de publication sans preuve.
 
 **Confirmation complémentaire — 16 octobre 2026 :** CI du code optimisé `9305b270` : [#38882978609](https://github.com/takatakca/mimt/actions/runs/38882978609) **réussie**. CI de la relève `16aee1b5` : [#38883162397](https://github.com/takatakca/mimt/actions/runs/38883162397) **réussie**. La tâche horaire autorisée « MIMT — Reprise GitHub » a été réactivée, sans permission supplémentaire de déployer. Cette confirmation produit un nouveau commit documentaire, dont il faut revérifier le SHA/CI après push. API/Web toujours `skipped`; aucune mise en production confirmée.
+
+## Avancement du 16 octobre 2026 — OPS-03
+
+- **OPS-03A — fait côté code / CI :** contrôle d'appartenance au bail au moment des acquittements des événements sortants TAKATAK, SQL `UPDATE ... WHERE next_attempt_at = expectedLeaseUntil RETURNING id`, équivalent en mémoire. Les vieux travailleurs ne peuvent plus écraser les résultats du nouveau bail. Tests de reprise et concurrence en PostgreSQL 16 + contrat commun; commit `2f4e8c5a`, CI `38942191701` verte.
+- **OPS-03B — pas encore homologué :** vérifier l'idempotence du consommateur webhook TAKATAK par `id`, y compris succès réseau suivi d'un crash et rejeu; se coordonner avec l'équipe du dépôt maître, sans modifier ses règles d'identité.
+- **Infra/CD :** `MIMT_WEB_DEPLOY_ENABLED`, `MIMT_API_DEPLOY_ENABLED` et revues obligatoires restent non activés; aucune preuve de publication de ce SHA ni de projet DB MIMT indépendant.

@@ -97,3 +97,9 @@ Correctif proposé : `data-href` n'est pas un lien, `data-id` n'est pas une cibl
 - **Production inchangée :** CD API/Web encore `skipped`. API, base et SHA actifs non confirmés; aucune base MIMT distincte dans la liste de cinq projets Supabase connectés. Pas de validation d'appel 9-1-1 ni de lancement télécom.
 
 **Confirmation complémentaire — 16 octobre 2026 :** CI du code optimisé `9305b270` : [#38882978609](https://github.com/takatakca/mimt/actions/runs/38882978609) **réussie**. CI de la relève `16aee1b5` : [#38883162397](https://github.com/takatakca/mimt/actions/runs/38883162397) **réussie**. La tâche horaire autorisée « MIMT — Reprise GitHub » a été réactivée, sans permission supplémentaire de déployer. Cette confirmation produit un nouveau commit documentaire, dont il faut revérifier le SHA/CI après push. API/Web toujours `skipped`; aucune mise en production confirmée.
+
+## 16 octobre 2026 — sécurité du traitement d'outbox (OPS-03)
+
+- GitHub `main`, correctif `2f4e8c5a38769151ffea1f618d76adba20a35505`; CI [#38942191701](https://github.com/takatakca/mimt/actions/runs/38942191701) réussie (tests PostgreSQL 16 isolés et build Web).
+- Les acquittements `takatak_outbox` sont désormais conditionnels au **bail effectivement détenu** : un ancien processus dont le bail a été repris ne peut plus écraser un statut de livraison ou un délai de nouvelle tentative. Les implémentations Postgres et mémoire et le contrat de Repository sont mis à jour; aucun changement de schéma requis.
+- L'intégration réceptrice TAKATAK doit malgré tout dédupliquer les événements via l'ID stable; garanties *at-least-once* uniquement. **Aucun déploiement confirmé** : les workflows Web et API de ce commit ont été `skipped`.

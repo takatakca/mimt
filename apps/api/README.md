@@ -168,3 +168,7 @@ La CI démarre un Postgres 16 isolé et exécute des tests de concurrence et de 
 ### Nettoyage des quotas PostgreSQL
 
 Le serveur API purge automatiquement les lignes `fraud_rate_buckets` **pleinement expirées depuis plus d'une heure**, au démarrage puis toutes les cinq minutes; chaque passage traite au maximum dix lots transactionnels de mille lignes (`SKIP LOCKED`). Les quotas actifs sont conservés. Aucun cron séparé n'est requis pour ce nettoyage tant que le serveur fonctionne; surveiller toutefois la taille de la table et les avertissements de maintenance. Tests de régression dans `apps/api/test/postgres-rate-limiter.test.ts`. Les autres tâches planifiées (numéros, dépenses) restent distinctes.
+
+### Protection contre les anciens travailleurs du webhook TAKATAK
+
+Les méthodes `markOutboxDelivered` et `markOutboxFailed` nécessitent désormais la valeur `nextAttemptAt` obtenue lors du `claimDueOutbox`; si le bail est repris, elles retournent `false` sans modifier l'événement. Cette protection vaut également pour les tests mémoire. Aucun nouveau champ SQL n'est requis. Conserver l'`id` d'événement identique lors de chaque tentative, et implémenter la déduplication côté TAKATAK : la livraison demeure *at-least-once*. Régression vérifiée avec Postgres 16 dans CI `38942191701`.
