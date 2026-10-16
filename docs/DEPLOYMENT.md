@@ -108,3 +108,5 @@ L'API exécute automatiquement le nettoyage de `fraud_rate_buckets` après le d�
 - Test CI vérifié : `38882774176` (première version). Version optimisée `9305b270` : run `38882978609`, état final à confirmer.
 - Vérifier métriques de taille de `fraud_rate_buckets`, volumes de refus HTTP 429, coût de nettoyage et sauvegardes après création autorisée d'une base MIMT indépendante; ne pas effectuer de SQL sur TAKATAK STAGING ou les autres projets.
 - Les déploiements GitHub vers Web et Coolify restent inactifs; configuration de l'hébergeur, des secrets et validation légale/9-1-1 requises.
+
+**Confirmation complémentaire — 16 octobre 2026 :** CI du code optimisé `9305b270` : [#38882978609](https://github.com/takatakca/mimt/actions/runs/38882978609) **réussie**. CI de la relève `16aee1b5` : [#38883162397](https://github.com/takatakca/mimt/actions/runs/38883162397) **réussie**. La tâche horaire autorisée « MIMT — Reprise GitHub » a été réactivée, sans permission supplémentaire de déployer. Cette confirmation produit un nouveau commit documentaire, dont il faut revérifier le SHA/CI après push. API/Web toujours `skipped`; aucune mise en production confirmée.

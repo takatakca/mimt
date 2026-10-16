@@ -1,5 +1,9 @@
 # MIMT — Relève automatique d'agent
 
+
+**Confirmation complémentaire — 16 octobre 2026 :** CI du code optimisé `9305b270` : [#38882978609](https://github.com/takatakca/mimt/actions/runs/38882978609) **réussie**. CI de la relève `16aee1b5` : [#38883162397](https://github.com/takatakca/mimt/actions/runs/38883162397) **réussie**. La tâche horaire autorisée « MIMT — Reprise GitHub » a été réactivée, sans permission supplémentaire de déployer. Cette confirmation produit un nouveau commit documentaire, dont il faut revérifier le SHA/CI après push. API/Web toujours `skipped`; aucune mise en production confirmée.
+
+
 ## Reprise du 16 octobre 2026 — OPS-02 nettoyage des quotas partagés
 
 - **Dépôt/branche et reprise :** `takatakca/mimt`, `main` initial `79086ed301efc13605614968539dd56654f7c3b5`; CI initiale [#38792683175](https://github.com/takatakca/mimt/actions/runs/38792683175) réussie; aucune PR/issue ouverte.
