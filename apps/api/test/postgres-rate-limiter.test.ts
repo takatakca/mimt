@@ -81,16 +81,16 @@ describe.skipIf(!url)("shared PostgreSQL rate limit (isolated CI database)", () 
     const hashes = keys.map(hash);
     await first`update public.fraud_rate_buckets
       set last_seen_at = clock_timestamp() - interval '2 hours'
-      where key_hash in ${first(hashes)}`;
+      where key_hash = any(${hashes})`;
     const removed = await pruneExpiredRateBuckets(first, 1);
     expect(removed).toBe(1);
-    const remaining = await first`select key_hash from public.fraud_rate_buckets where key_hash in ${first(hashes)}`;
+    const remaining = await first`select key_hash from public.fraud_rate_buckets where key_hash = any(${hashes})`;
     expect(remaining).toHaveLength(2);
     const activeKey = "prune-active:" + crypto.randomUUID();
     expect(await a.take(activeKey, rule)).toBe(true);
     const activeHash = hash(activeKey);
     expect(await pruneExpiredRateBuckets(first, 10_000)).toBeGreaterThanOrEqual(2);
-    expect(await first`select key_hash from public.fraud_rate_buckets where key_hash in ${first(hashes)}`).toHaveLength(0);
+    expect(await first`select key_hash from public.fraud_rate_buckets where key_hash = any(${hashes})`).toHaveLength(0);
     expect(await first`select key_hash from public.fraud_rate_buckets where key_hash = ${activeHash}`).toHaveLength(1);
     expect(await a.take(activeKey, rule)).toBe(false);
     for (const bad of [0, -1, 10_001, Number.NaN, 1.1]) {
@@ -106,14 +106,14 @@ describe.skipIf(!url)("shared PostgreSQL rate limit (isolated CI database)", () 
     const hashes = keys.map(hash);
     for (const key of keys) expect(await limiter.take(key, { capacity: 1, windowSeconds: 60 })).toBe(true);
     await first`update public.fraud_rate_buckets set last_seen_at = clock_timestamp() - interval '2 hours'
-      where key_hash in ${first(hashes)}`;
+      where key_hash = any(${hashes})`;
     const attempts = await Promise.all([
       pruneExpiredRateBuckets(first, 2),
       pruneExpiredRateBuckets(second, 2),
     ]);
     expect(attempts.every((n) => n <= 2)).toBe(true);
     await pruneExpiredRateBuckets(first, 10_000);
-    expect(await first`select key_hash from public.fraud_rate_buckets where key_hash in ${first(hashes)}`).toHaveLength(0);
+    expect(await first`select key_hash from public.fraud_rate_buckets where key_hash = any(${hashes})`).toHaveLength(0);
   });
 
   it("rejects an incomplete or RLS-unprotected database at /readyz storage check", async () => {
