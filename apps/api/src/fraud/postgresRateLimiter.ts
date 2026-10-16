@@ -80,14 +80,27 @@ export class PostgresRateLimiter implements RateLimiter {
 
 /**
  * Prune only expired buckets that have had no requests for > 1 extra hour.
- * Run as a scheduled maintenance job (not in the emergency call path).
- * Safe across replicas: DELETE and rate-limit updates take row locks.
+ * Executed in small bounded batches by the hourly maintenance scheduler.
+ * Safe across replicas: DELETE and consumption take row locks; never called on emergency routes.
  */
-export async function pruneExpiredRateBuckets(sql: Sql): Promise<number> {
+export async function pruneExpiredRateBuckets(sql: Sql, limit = 1_000): Promise<number> {
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > 10_000) {
+    throw new Error("Rate bucket cleanup batch must be between 1 and 10000");
+  }
+  // Small batches avoid an unbounded DELETE transaction as untrusted IPs
+  // create fresh HMAC bucket keys. SKIP LOCKED avoids competing with a live
+  // token consumption or a maintenance run on another API replica.
   const rows = await sql<{ removed: number }[]>`
-    with removed as (
-      delete from public.fraud_rate_buckets
+    with candidate as (
+      select key_hash from public.fraud_rate_buckets
       where last_seen_at + (window_seconds * interval '1 second') < clock_timestamp() - interval '1 hour'
+      order by last_seen_at
+      limit ${limit}
+      for update skip locked
+    ), removed as (
+      delete from public.fraud_rate_buckets as bucket using candidate as c
+      where bucket.key_hash = c.key_hash
+        and bucket.last_seen_at + (bucket.window_seconds * interval '1 second') < clock_timestamp() - interval '1 hour'
       returning 1
     )
     select count(*)::integer as removed from removed
