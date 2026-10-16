@@ -1,5 +1,19 @@
 # MIMT — Relève automatique d'agent
 
+## Reprise du 16 octobre 2026 — OPS-02 nettoyage des quotas partagés
+
+- **Dépôt/branche et reprise :** `takatakca/mimt`, `main` initial `79086ed301efc13605614968539dd56654f7c3b5`; CI initiale [#38792683175](https://github.com/takatakca/mimt/actions/runs/38792683175) réussie; aucune PR/issue ouverte.
+- **Dernière tâche code terminée :** `OPS-02` — limiter `pruneExpiredRateBuckets` à 1–10 000 lignes par transaction (1 000 par défaut), `FOR UPDATE SKIP LOCKED` et nouvelle vérification d'expiration avant suppression; ajouter exécution automatique après écoute HTTP et toutes les cinq minutes, jusqu'à 10 lots de 1 000 par passage. Le nettoyage ne bloque aucun chemin E911 ni callback; une erreur DB émet seulement un avertissement sans secrets ni paramètres.
+- **Fichiers modifiés :** `WORKLOG.md`, `apps/api/src/fraud/postgresRateLimiter.ts`, `apps/api/src/server.ts`, `apps/api/test/postgres-rate-limiter.test.ts`; cette session actualise aussi les cinq documents `docs/` et `apps/api/README.md`.
+- **Dernier code poussé :** `9305b270d3fae5bf1ad19a36c5112d460ce6d405` (optimisation). Première version `e9a523520e62480ff9ee4be08e00c014426dff62` : [CI #38882774176](https://github.com/takatakca/mimt/actions/runs/38882774176) **réussie** avec PostgreSQL isolé, typage, tests et export Web. CI optimisée [#38882978609](https://github.com/takatakca/mimt/actions/runs/38882978609) lancée; consulter sa conclusion puis la CI du nouveau SHA documentaire.
+- **Vérifications :** fichiers GitHub et historique, branches/PR/issues, schéma SQL, tests des buckets expirés et actifs, plusieurs nettoyeurs simultanés via Postgres 16 sur GitHub Actions. Tentatives de lecture de `https://api.mimt.ca/healthz`, `/readyz` et `https://mimt.ca/deploy-version.txt` non accessibles depuis l'outil Web; impossible d'affirmer une panne réelle ou un déploiement. Supabase connecté: cinq projets, aucun MIMT.
+- **Déploiement :** workflows API/Web `skipped` pour le dernier SHA technique contrôlé; aucune migration ni configuration de secret effectuée, aucun SHA live prouvé. Respect des garde-fous 9-1-1, de la séparation des données et de la non-création de projet Supabase facturable.
+- **Problèmes et accès nécessaires :** base Supabase MIMT indépendante région Canada et migrations 0001–0004 + buckets partagés, `RATE_LIMIT_HMAC_KEY`, ressources Coolify API réelles et SSH site, clés Twilio/Stripe et accords juridiques/CRTC/E911. `WEB-02` consentement est toujours marqué actif par un autre agent; ne pas modifier ses fichiers sans relève explicite. Vérifier l'idempotence des webhooks TAKATAK côté récepteur.
+- **Prochaine action exacte :** 1) lire SHA/CI de `main`; 2) confirmer #38882978609 et CI documentaire ; 3) auditer la limite Fastify de routes spécifiques et le récepteur des webhooks sans toucher au dépôt maître; 4) si un projet MIMT dédié/secret sécurisé et l'hébergeur sont autorisés et réellement vérifiés, appliquer et contrôler les migrations/RLS, déployer progressivement et comparer le SHA public. Ne pas activer CD sinon.
+
+---
+
+
 ## Relève vérifiée — 15 octobre 2026 (SECURITY-03C et OPS-01)
 
 - **Dernière tâche terminée :** `OPS-01`, réservation atomique avec `FOR UPDATE SKIP LOCKED` de la file des webhooks TAKATAK et bail de 120 s; limitation HTTP partagée `SECURITY-03C` réalisée juste avant. Les exceptions 9-1-1 et callbacks signés sont préservées.

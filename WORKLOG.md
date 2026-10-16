@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-16 | GPT-6 (OPS-02 rate bucket maintenance) | main | active | Bound PostgreSQL abuse-bucket pruning and schedule periodic maintenance; protect live quotas, concurrency and emergency paths | Add regression tests, verify CI, update five handoff docs; deploy remains gated
+- 2026-10-16 | GPT-6 (OPS-02 rate bucket maintenance) | main | code pushed, first CI green; optimized CI checking | Bounded SQL cleanup with FOR UPDATE SKIP LOCKED and batch validation, safe startup/5-minute scheduler at most 10 × 1000 rows, active quotas protected; isolated PostgreSQL tests (batch/concurrency); initial CI #38882774176 green at e9a52352 | Check #38882978609 on optimized SHA 9305b270; CD remains gated; verify next documentation HEAD CI
 
 - 2026-10-15 | GPT-6 (OPS-01 outbox lease) | main | done (code/CI) | PostgreSQL SKIP LOCKED atomic event claiming, 120s lease and 5-event batches, guarded delivered/failed mutations, crash retry + isolated Postgres integration concurrency tests; CI #38792255274 green at 35b693ac | TAKATAK consumer must deduplicate stable event IDs (at-least-once); no live deployment verified
 

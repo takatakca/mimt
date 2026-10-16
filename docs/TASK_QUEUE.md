@@ -69,3 +69,9 @@ Mise à jour : 2026-10-14. Marquer une tâche terminée seulement après preuve 
 - **OPS-01A — code terminé, CI verte :** prise de bail atomique des événements `takatak_outbox` avec récupération après interruption, concurrence vérifiée dans PostgreSQL 16 isolé. SHA `35b693ac`, CI `38792255274`. **Reste :** validation du traitement idempotent à destination côté TAKATAK pour garantir l'absence de double effet métier malgré les reprises.
 - **OPS-01B — à faire en coordination :** vérifier idempotence du receveur TAKATAK et observabilité des baux/reprises. Ne pas modifier TAKATAK depuis le repository MIMT.
 - **Déploiements** : API et Web `skipped`. Aucune validation de l'hébergeur ou de la DB dédiée; tâches de publication conservées bloquées.
+
+## Exécution OPS-02 du 16 octobre 2026
+
+- **OPS-02 — implémenté et tests SQL ajoutés :** purge périodique des clés expirées PostgreSQL; protection contre le verrouillage d'une clé consommée, limite de 1 000 suppressions/transaction, 10 transactions max par passage, cadence de 5 minutes; fonctionne après démarrage sans Cron Coolify supplémentaire. Premier contrôle CI `38882774176` réussi; optimisation `9305b270` dans CI `38882978609`.
+- **OPS-02-B — à faire en exploitation :** surveiller le nombre de buckets et les erreurs de nettoyage, vérifier le comportement avec un projet MIMT dédié, les sauvegardes et la restauration. Ne pas extrapoler le test Postgres CI à une production Supabase absente.
+- Les tâches bloquées `WEB-01/WEB-02/TEL-00/TEL-01/TEL-02/SECURITY-01` restent ouvertes; ne pas activer des drapeaux de publication sans preuve.

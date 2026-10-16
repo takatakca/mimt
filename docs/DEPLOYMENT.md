@@ -101,3 +101,10 @@ Les URL publiques `https://mimt.ca/deploy-version.txt`, `https://api.mimt.ca/hea
 **Outbox TAKATAK :** les travailleurs réclament au maximum cinq événements à la fois en écrivant atomiquement une échéance `next_attempt_at` de +120 s, grâce au verrouillage `FOR UPDATE SKIP LOCKED`. L'envoi utilise des IDs stables et une temporisation HTTP de 10 s/événement. Après crash, les événements redeviennent admissibles lorsque le bail expire. Cela évite les prises concurrentes ordinaires, mais **n'offre pas l'exactement-une-fois** ; le consommateur TAKATAK doit dédupliquer les effets métiers sur l'ID d'événement. CI Postgres `38792255274` verte. **Aucune migration additionnelle** pour ce mécanisme, car `next_attempt_at` existait déjà.
 
 Ne pas activer Coolify ni le CD sans schéma MIMT en place et test des webhooks de bout en bout. Aucun projet Supabase MIMT connecté n'a été identifié. Ne pas utiliser les projets des autres produits.
+
+## Maintenance intégrée de la base MIMT — 16 octobre 2026
+
+L'API exécute automatiquement le nettoyage de `fraud_rate_buckets` après le démarrage HTTPS et ensuite toutes les **5 minutes**. Elle supprime uniquement les lignes HMAC dont l'expiration dépasse plus d'une heure, par transaction plafonnée à **1 000** lignes, et par passage plafonné à **10** transactions; les sélections utilisent `FOR UPDATE SKIP LOCKED` pour éviter de bloquer la prise de jetons en cours ou les autres réplicas. Le nettoyage ne s'exécute jamais dans les requêtes d'urgence. Les incidents DB sont journalisés sans données personnelles ni SQL brut; aucun fallback qui accorde automatiquement un quota.
+- Test CI vérifié : `38882774176` (première version). Version optimisée `9305b270` : run `38882978609`, état final à confirmer.
+- Vérifier métriques de taille de `fraud_rate_buckets`, volumes de refus HTTP 429, coût de nettoyage et sauvegardes après création autorisée d'une base MIMT indépendante; ne pas effectuer de SQL sur TAKATAK STAGING ou les autres projets.
+- Les déploiements GitHub vers Web et Coolify restent inactifs; configuration de l'hébergeur, des secrets et validation légale/9-1-1 requises.

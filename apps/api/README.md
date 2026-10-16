@@ -164,3 +164,7 @@ La CI démarre un Postgres 16 isolé et exécute des tests de concurrence et de 
 - Les endpoints d'urgence et de configuration 9-1-1, la santé et les callbacks signés connus sont exclus du quota partagé. Une URL inconnue sous `/webhooks/` ne contourne plus la limitation.
 - Le poller `takatak_outbox` utilise une réservation SQL atomique avec un bail de 120 s et cinq événements maximum, aucune nouvelle migration, et chaque corps signé contient un `id` stable. **Le serveur récepteur TAKATAK doit dédupliquer les ID d'événements** pour se protéger d'une retransmission après crash (livraison *at-least-once*).
 - CI confirmées : `38791371698` et `38792255274`; **aucune preuve d'installation de ces commits en production**. Ne pas activer les déploiements tant que Supabase MIMT séparé, HMAC, secrets, Twilio et 9-1-1 ne sont pas approuvés et vérifiés.
+
+### Nettoyage des quotas PostgreSQL
+
+Le serveur API purge automatiquement les lignes `fraud_rate_buckets` **pleinement expirées depuis plus d'une heure**, au démarrage puis toutes les cinq minutes; chaque passage traite au maximum dix lots transactionnels de mille lignes (`SKIP LOCKED`). Les quotas actifs sont conservés. Aucun cron séparé n'est requis pour ce nettoyage tant que le serveur fonctionne; surveiller toutefois la taille de la table et les avertissements de maintenance. Tests de régression dans `apps/api/test/postgres-rate-limiter.test.ts`. Les autres tâches planifiées (numéros, dépenses) restent distinctes.
