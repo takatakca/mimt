@@ -379,8 +379,9 @@ export interface Repository {
   listDueOutbox(now: Date, limit: number): Promise<OutboxEvent[]>;
   /** Atomically claim due events for a bounded lease; safe across database replicas. */
   claimDueOutbox(now: Date, limit: number, leaseMs?: number): Promise<OutboxEvent[]>;
-  markOutboxDelivered(id: string, at: Date): Promise<void>;
-  markOutboxFailed(id: string, error: string, nextAttemptAt: Date | null): Promise<void>;
+  /** Only the holder of the exact claimed lease may acknowledge or retry an event. */
+  markOutboxDelivered(id: string, at: Date, expectedLeaseUntil: Date): Promise<boolean>;
+  markOutboxFailed(id: string, error: string, nextAttemptAt: Date | null, expectedLeaseUntil: Date): Promise<boolean>;
 
   audit(entry: AuditEntry): Promise<void>;
 }

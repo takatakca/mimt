@@ -522,20 +522,20 @@ export class MemoryRepository implements Repository {
     for (const row of available) row.nextAttemptAt = until;
     return available.map(clone);
   }
-  async markOutboxDelivered(id: string, at: Date) {
+  async markOutboxDelivered(id: string, at: Date, expectedLeaseUntil: Date) {
     const e = this.outbox.find((x) => x.id === id);
-    if (e && !e.deliveredAt) {
-      e.deliveredAt = at;
-      e.attempts++;
-    }
+    if (!e || e.deliveredAt || e.nextAttemptAt?.getTime() !== expectedLeaseUntil.getTime()) return false;
+    e.deliveredAt = at;
+    e.attempts++;
+    return true;
   }
-  async markOutboxFailed(id: string, error: string, nextAttemptAt: Date | null) {
+  async markOutboxFailed(id: string, error: string, nextAttemptAt: Date | null, expectedLeaseUntil: Date) {
     const e = this.outbox.find((x) => x.id === id);
-    if (e && !e.deliveredAt) {
-      e.attempts++;
-      e.lastError = error;
-      e.nextAttemptAt = nextAttemptAt;
-    }
+    if (!e || e.deliveredAt || e.nextAttemptAt?.getTime() !== expectedLeaseUntil.getTime()) return false;
+    e.attempts++;
+    e.lastError = error;
+    e.nextAttemptAt = nextAttemptAt;
+    return true;
   }
 
   async audit(entry: AuditEntry) {

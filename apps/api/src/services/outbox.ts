@@ -23,6 +23,9 @@ export async function deliverOutbox(input: {
   let failed = 0;
   // Five sequential 10s requests complete before a 120s lease expires.
   for (const ev of await repo.claimDueOutbox(now, 5, 120_000)) {
+    // The claim's exact lease deadline fences off stale workers.
+    if (!ev.nextAttemptAt) continue;
+    const leaseUntil = ev.nextAttemptAt;
     const body = JSON.stringify({ id: ev.id, type: ev.eventType, created_at: ev.createdAt.toISOString(), data: ev.payload });
     try {
       const res = await doFetch(url, {
@@ -32,14 +35,16 @@ export async function deliverOutbox(input: {
         signal: AbortSignal.timeout(10_000),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      await repo.markOutboxDelivered(ev.id, new Date());
-      delivered++;
+      const acknowledged = await repo.markOutboxDelivered(ev.id, new Date(), leaseUntil);
+      if (acknowledged) delivered++;
     } catch (err) {
-      failed++;
       const attempts = ev.attempts + 1;
       const next = attempts >= MAX_ATTEMPTS ? null : new Date(now.getTime() + Math.min(30_000 * 2 ** ev.attempts, 4 * 3600_000));
-      await repo.markOutboxFailed(ev.id, String(err instanceof Error ? err.message : err), next);
-      log.warn({ eventId: ev.id, type: ev.eventType, attempts, dead: next === null }, "TAKATAK webhook delivery failed");
+      const applied = await repo.markOutboxFailed(ev.id, String(err instanceof Error ? err.message : err), next, leaseUntil);
+      if (applied) {
+        failed++;
+        log.warn({ eventId: ev.id, type: ev.eventType, attempts, dead: next === null }, "TAKATAK webhook delivery failed");
+      }
     }
   }
   return { delivered, failed };

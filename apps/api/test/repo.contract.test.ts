@@ -207,10 +207,12 @@ for (const [name, make, enabled] of impls) {
 
       const ev = await repo.enqueueOutbox("entitlement.updated", { plan: "premium" });
       expect(await repo.listDueOutbox(new Date(Date.now() + 1000), 10)).toHaveLength(1);
-      await repo.markOutboxFailed(ev.id, "HTTP 500", null);
+      const claim = (await repo.claimDueOutbox(new Date(Date.now() + 1000), 10))[0]!;
+      expect(await repo.markOutboxFailed(ev.id, "HTTP 500", null, claim.nextAttemptAt!)).toBe(true);
       expect(await repo.listDueOutbox(new Date(Date.now() + 1000), 10)).toHaveLength(0);
       const ev2 = await repo.enqueueOutbox("phone_number.assigned", { e164: "+1" });
-      await repo.markOutboxDelivered(ev2.id, new Date());
+      const claim2 = (await repo.claimDueOutbox(new Date(Date.now() + 1000), 10))[0]!;
+      expect(await repo.markOutboxDelivered(ev2.id, new Date(), claim2.nextAttemptAt!)).toBe(true);
       expect(await repo.listDueOutbox(new Date(Date.now() + 1000), 10)).toHaveLength(0);
 
       await repo.audit({ actorUserId: user.id, action: "test", meta: { a: 1 } });

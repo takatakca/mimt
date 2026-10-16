@@ -450,11 +450,25 @@ export class PostgresRepository implements Repository {
       returning o.*
     `) as unknown as OutboxEvent[];
   }
-  async markOutboxDelivered(id: string, at: Date) {
-    await this.sql`update takatak_outbox set delivered_at = ${at}, attempts = attempts + 1 where id = ${id} and delivered_at is null`;
+  async markOutboxDelivered(id: string, at: Date, expectedLeaseUntil: Date) {
+    // Fencing: an expired worker cannot acknowledge a lease a different
+    // worker has already renewed. Timestamp is returned by claimDueOutbox.
+    const rows = await this.sql`
+      update takatak_outbox
+      set delivered_at = ${at}, attempts = attempts + 1
+      where id = ${id} and delivered_at is null and next_attempt_at = ${expectedLeaseUntil}
+      returning id
+    `;
+    return rows.length === 1;
   }
-  async markOutboxFailed(id: string, error: string, nextAttemptAt: Date | null) {
-    await this.sql`update takatak_outbox set attempts = attempts + 1, last_error = ${error}, next_attempt_at = ${nextAttemptAt} where id = ${id} and delivered_at is null`;
+  async markOutboxFailed(id: string, error: string, nextAttemptAt: Date | null, expectedLeaseUntil: Date) {
+    const rows = await this.sql`
+      update takatak_outbox
+      set attempts = attempts + 1, last_error = ${error}, next_attempt_at = ${nextAttemptAt}
+      where id = ${id} and delivered_at is null and next_attempt_at = ${expectedLeaseUntil}
+      returning id
+    `;
+    return rows.length === 1;
   }
 
   async audit(e: AuditEntry) {
